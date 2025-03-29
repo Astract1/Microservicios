@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "rZ9J/WSF2II=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Juan Jimenez\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.3\\microsoft.aspnetcore.openapi.9.0.3.nupkg.sha512",
+    "C:\\Users\\Juan Jimenez\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

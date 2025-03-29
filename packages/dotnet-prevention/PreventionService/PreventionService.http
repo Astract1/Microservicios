@@ -1,0 +1,6 @@
+@PreventionService_HostAddress = http://localhost:5253
+
+GET {{PreventionService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
