@@ -1,18 +1,17 @@
 // src/index.js
 const express = require('express');
-const pool = require('./db');  // Importa el pool de conexión
+const pool = require('./db');
+require('dotenv').config();
 
 const app = express();
-const { getAirQualityData } = require('./services/airQualityService');
+const { getAirQualityData, getAirQualityStations } = require('./services/airQualityService.js');
 const port = 3000;
-require('dotenv').config();
 
 // Endpoint para probar la conexión a MariaDB
 app.get('/test-db', async (req, res) => {
   let connection;
   try {
     connection = await pool.getConnection();
-    // Si se obtiene la conexión, la liberamos y devolvemos el mensaje
     connection.release();
     res.send('Ejemplo conectado: Conexión a MariaDB exitosa.');
   } catch (error) {
@@ -26,15 +25,36 @@ app.get('/', (req, res) => {
   res.send('Microservicio de Monitoreo Ambiental en funcionamiento.');
 });
 
+// Endpoint para obtener datos de calidad del aire
 app.get('/calidad-aire', async (req, res) => {
   try {
     const data = await getAirQualityData();
     res.json(data);
   } catch (error) {
-    res.status(500).send('Error al obtener la calidad del aire');
+    console.error('Error completo:', error);
+    res.status(500).json({
+      message: 'Error al obtener la calidad del aire',
+      error: error.message,
+      details: error.response?.data || null
+    });
   }
 });
 
-app.listen(port, () => {
+// Nuevo endpoint para obtener estaciones de monitoreo
+app.get('/estaciones', async (req, res) => {
+  try {
+    const data = await getAirQualityStations();
+    res.json(data);
+  } catch (error) {
+    console.error('Error al obtener estaciones:', error);
+    res.status(500).json({
+      message: 'Error al obtener estaciones de monitoreo',
+      error: error.message,
+      details: error.response?.data || null
+    });
+  }
+});
+
+app.listen(port, () => {  
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });
