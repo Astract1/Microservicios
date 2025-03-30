@@ -1,0 +1,9 @@
+
+# Archivos de configuración de entorno
+.env
+
+# Logs
+*.log
+
+# Archivos temporales
+tmp/
