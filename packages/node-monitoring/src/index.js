@@ -1,10 +1,14 @@
-// src/index.js
 const express = require('express');
 const pool = require('./db');
 require('dotenv').config();
 
 const app = express();
-const { getAirQualityData, getAirQualityStations } = require('./services/airQualityService.js');
+const { 
+  getAirQualityData, 
+  getAirQualityStations, 
+  getSupportedCountries,
+  getAirQualityByNeighborhoods 
+} = require('./services/airQualityService.js');
 const port = 3000;
 
 // Endpoint para probar la conexión a MariaDB
@@ -40,7 +44,7 @@ app.get('/calidad-aire', async (req, res) => {
   }
 });
 
-// Nuevo endpoint para obtener estaciones de monitoreo
+// Endpoint para obtener estaciones de monitoreo
 app.get('/estaciones', async (req, res) => {
   try {
     const data = await getAirQualityStations();
@@ -55,6 +59,37 @@ app.get('/estaciones', async (req, res) => {
   }
 });
 
+// Endpoint para listar países soportados
+app.get('/paises', async (req, res) => {
+  try {
+    const data = await getSupportedCountries();
+    res.json(data);
+  } catch (error) {
+    console.error('Error al obtener países:', error);
+    res.status(500).json({
+      message: 'Error al obtener lista de países',
+      error: error.message,
+      details: error.response?.data || null
+    });
+  }
+});
+
+// Nuevo endpoint para obtener datos de calidad del aire por barrios
+app.get('/barrios', async (req, res) => {
+  try {
+    const data = await getAirQualityByNeighborhoods();
+    res.json(data);
+  } catch (error) {
+    console.error('Error al obtener datos por barrios:', error);
+    res.status(500).json({
+      message: 'Error al obtener datos de calidad del aire por barrios',
+      error: error.message,
+      details: error.response?.data || null
+    });
+  }
+});
+
 app.listen(port, () => {  
   console.log(`Servidor escuchando en http://localhost:${port}`);
+  console.log(`API alternativa en uso: IQAir`);
 });
