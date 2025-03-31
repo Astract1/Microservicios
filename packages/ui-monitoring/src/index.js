@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';  
-import './styles/index.css';
+//import './styles/tailwind-basic.css'; 
+import './styles/index.css'
 import App from './App';
-
 // Eliminar esta línea
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 

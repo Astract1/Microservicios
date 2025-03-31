@@ -10,26 +10,31 @@ import AlertsPage from './components/Alerts/AlertsPage';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 
+// Sistema de temas
+import { ThemeProvider } from './styles/theme';
+
 // Estilos
 import './styles/index.css';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/calidad-aire" element={<AirQualityPage />} />
-            <Route path="/clima" element={<WeatherPage />} />
-            <Route path="/precipitaciones" element={<RainfallPage />} />
-            <Route path="/alertas" element={<AlertsPage />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-300">
+          <Navbar />
+          <main className="flex-grow container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/calidad-aire" element={<AirQualityPage />} />
+              <Route path="/clima" element={<WeatherPage />} />
+              <Route path="/precipitaciones" element={<RainfallPage />} />
+              <Route path="/alertas" element={<AlertsPage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
