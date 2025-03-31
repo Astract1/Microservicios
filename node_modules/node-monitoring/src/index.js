@@ -1,4 +1,6 @@
 const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
 const pool = require('./db');
 require('dotenv').config();
 
@@ -14,6 +16,9 @@ const port = process.env.PORT || 3000;
 // Middleware para procesar JSON
 app.use(express.json());
 
+// Habilitar CORS para todas las rutas
+app.use(cors());
+
 // Endpoint básico para comprobar que el servicio sigue funcionando
 app.get('/', (req, res) => {
   res.json({
@@ -21,6 +26,93 @@ app.get('/', (req, res) => {
     status: 'en funcionamiento',
     timestamp: new Date().toISOString()
   });
+});
+
+// Endpoint para verificar el estado de las APIs
+app.get('/api/diagnostics', async (req, res) => {
+  const results = {
+    timestamp: new Date().toISOString(),
+    apis: {},
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      DEFAULT_CITY: process.env.DEFAULT_CITY,
+      IQAIR_API_KEY: process.env.IQAIR_API_KEY ? '****' + process.env.IQAIR_API_KEY.slice(-4) : 'No definida',
+      WEATHER_API_KEY: process.env.WEATHER_API_KEY ? '****' + process.env.WEATHER_API_KEY.slice(-4) : 'No definida',
+      IQAIR_BASE_URL: process.env.IQAIR_BASE_URL || 'http://api.airvisual.com/v2',
+      WEATHER_API_URL: process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5'
+    }
+  };
+  
+  // Verificar IQAir
+  try {
+    const iqairStart = Date.now();
+    const iqairResponse = await axios.get(`${process.env.IQAIR_BASE_URL || 'http://api.airvisual.com/v2'}/countries`, {
+      params: { key: process.env.IQAIR_API_KEY },
+      timeout: 5000
+    });
+    results.apis.iqair = {
+      status: 'success',
+      responseTime: Date.now() - iqairStart,
+      statusCode: iqairResponse.status,
+      dataAvailable: !!iqairResponse.data
+    };
+  } catch (error) {
+    results.apis.iqair = {
+      status: 'error',
+      message: error.message,
+      code: error.response?.status || 'unknown',
+      detail: error.response?.data || {}
+    };
+  }
+  
+  // Verificar OpenWeatherMap
+  try {
+    const owmStart = Date.now();
+    const owmResponse = await axios.get(`${process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5'}/weather`, {
+      params: {
+        lat: process.env.DEFAULT_LAT || '4.6097',
+        lon: process.env.DEFAULT_LON || '-74.0817',
+        appid: process.env.WEATHER_API_KEY,
+        units: 'metric'
+      },
+      timeout: 5000
+    });
+    results.apis.openweathermap = {
+      status: 'success',
+      responseTime: Date.now() - owmStart,
+      statusCode: owmResponse.status,
+      dataAvailable: !!owmResponse.data
+    };
+  } catch (error) {
+    results.apis.openweathermap = {
+      status: 'error',
+      message: error.message,
+      code: error.response?.status || 'unknown',
+      detail: error.response?.data || {}
+    };
+  }
+  
+  // Verificar base de datos
+  try {
+    const dbStart = Date.now();
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT COUNT(*) as count FROM air_quality_measurements');
+    connection.release();
+    results.db = {
+      status: 'connected',
+      responseTime: Date.now() - dbStart,
+      records: {
+        air_quality_measurements: rows[0].count
+      }
+    };
+  } catch (error) {
+    results.db = {
+      status: 'error',
+      message: error.message
+    };
+  }
+  
+  res.json(results);
 });
 
 // Endpoint para probar la conexión a MariaDB
@@ -375,6 +467,10 @@ function generateRecommendations(airQuality, weather, alerts) {
 app.listen(port, () => {  
   console.log(`Servidor escuchando en http://localhost:${port}`);
   console.log('API de calidad del aire: IQAir');
+  console.log('Variables de entorno cargadas:');
+  console.log('- IQAIR_BASE_URL:', process.env.IQAIR_BASE_URL);
+  console.log('- WEATHER_API_URL:', process.env.WEATHER_API_URL);
+  console.log('- NODE_ENV:', process.env.NODE_ENV);
   console.log('Inicializando tareas programadas...');
   
   // Iniciar tareas programadas

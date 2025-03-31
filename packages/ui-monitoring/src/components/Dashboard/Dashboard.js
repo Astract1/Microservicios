@@ -16,12 +16,25 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        console.log('Fetching dashboard data...');
+        console.log('API URL:', process.env.REACT_APP_API_URL);
+        
         const response = await dashboardService.getData();
+        console.log('Dashboard data received:', response.data);
         setDashboardData(response.data);
         setError(null);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
-        setError('No se pudieron cargar los datos. Por favor, inténtelo de nuevo más tarde.');
+        // Mostrar información detallada del error
+        if (err.response) {
+          console.error('Error response:', err.response.data);
+          console.error('Status:', err.response.status);
+        } else if (err.request) {
+          console.error('No response received:', err.request);
+        } else {
+          console.error('Error setting up request:', err.message);
+        }
+        setError('No se pudieron cargar los datos. Error: ' + (err.response?.data?.message || err.message));
       } finally {
         setLoading(false);
       }
@@ -52,7 +65,23 @@ const Dashboard = () => {
       
       {error && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+          <p className="font-bold">Error al cargar datos</p>
           <p>{error}</p>
+          <button 
+            className="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
+            onClick={() => window.location.reload()}
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+      
+      {loading && !error && (
+        <div className="text-center py-10">
+          <p className="text-gray-600">Cargando datos del dashboard...</p>
+          <div className="mt-4 flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
         </div>
       )}
       
@@ -70,6 +99,9 @@ const Dashboard = () => {
               <p className="text-gray-700">Temperatura: {dashboardData.airQuality.temperature}°C</p>
               <p className="text-gray-700">Humedad: {dashboardData.airQuality.humidity}%</p>
               <p className="text-gray-500 text-sm mt-2">Actualizado: {new Date(dashboardData.airQuality.timestamp).toLocaleString()}</p>
+              {dashboardData.airQuality.simulated && (
+                <p className="text-xs text-blue-600 italic mt-1">Datos simulados para desarrollo</p>
+              )}
             </div>
           ) : (
             <p>No hay datos disponibles</p>
@@ -88,6 +120,9 @@ const Dashboard = () => {
               <p className="text-gray-700">Viento: {dashboardData.weather.windSpeed} km/h</p>
               <p className="text-gray-700">Precipitación: {dashboardData.weather.precipitation} mm</p>
               <p className="text-gray-500 text-sm mt-2">{dashboardData.weather.weatherDescription}</p>
+              {dashboardData.weather.simulated && (
+                <p className="text-xs text-blue-600 italic mt-1">Datos simulados para desarrollo</p>
+              )}
             </div>
           ) : (
             <p>No hay datos disponibles</p>
@@ -140,6 +175,12 @@ const Dashboard = () => {
           </ul>
         </div>
       )}
+      
+      {/* Información del sistema */}
+      <div className="mt-6 text-right text-xs text-gray-500">
+        <p>Última actualización: {new Date().toLocaleString()}</p>
+        <p>Estado: {error ? 'Error' : loading ? 'Cargando' : 'Datos actualizados'}</p>
+      </div>
     </div>
   );
 };

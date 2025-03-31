@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Usamos variables de entorno
 const BASE_URL = process.env.IQAIR_BASE_URL || 'http://api.airvisual.com/v2';
-const API_KEY = process.env.IQAIR_API_KEY;  
+const API_KEY = process.env.IQAIR_API_KEY;
 
 // Valores predeterminados para la ciudad
 const DEFAULT_CITY = process.env.DEFAULT_CITY || 'Bogota';
@@ -44,6 +44,7 @@ async function getAirQualityData() {
   try {
     console.log('Intentando obtener datos de calidad del aire con IQAir...');
     console.log(`URL: ${BASE_URL}/city, API Key: ${API_KEY ? API_KEY.substr(0, 4) + '...' : 'no definida'}`);
+    console.log(`Ciudad: ${DEFAULT_CITY}, Estado: ${DEFAULT_STATE}, País: ${DEFAULT_COUNTRY}`);
     
     if (!API_KEY) {
       throw new Error('API key no configurada. Configure IQAIR_API_KEY en las variables de entorno.');
@@ -55,8 +56,11 @@ async function getAirQualityData() {
         state: DEFAULT_STATE,
         country: DEFAULT_COUNTRY,
         key: API_KEY
-      }
+      },
+      timeout: 10000 // 10 segundos
     });
+    
+    console.log('Respuesta de IQAir recibida con éxito');
     
     // Procesar los datos para un formato más amigable
     const data = response.data;
@@ -72,6 +76,7 @@ async function getAirQualityData() {
     // Guardar en la base de datos
     try {
       await saveAirQualityData(processedData);
+      console.log('Datos guardados en la base de datos correctamente');
     } catch (error) {
       console.warn('No se pudieron guardar los datos en la BD:', error.message);
     }
@@ -82,7 +87,20 @@ async function getAirQualityData() {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error en getAirQualityData:', error.response?.data || error.message);
+    console.error('Error en getAirQualityData:');
+    // Mostrar información detallada del error
+    if (error.response) {
+      console.error('Respuesta de error:', {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: JSON.stringify(error.response.data, null, 2)
+      });
+    } else if (error.request) {
+      console.error('No se recibió respuesta:', error.request);
+    } else {
+      console.error('Error de configuración:', error.message);
+    }
+    console.error('Stack:', error.stack);
     
     // Si estamos en modo desarrollo, devolver datos simulados
     if (process.env.NODE_ENV === 'development' || !API_KEY) {

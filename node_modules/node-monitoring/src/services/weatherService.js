@@ -9,10 +9,6 @@ axios.defaults.timeout = 10000;
 const WEATHER_API_URL = process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5';
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
-// IQAir para datos de calidad del aire
-const IQAIR_API_URL = process.env.IQAIR_API_URL || 'http://api.airvisual.com/v2';
-const IQAIR_API_KEY = process.env.IQAIR_API_KEY;
-
 // Valores predeterminados para la ciudad
 const DEFAULT_CITY = process.env.DEFAULT_CITY || 'Bogota';
 const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LAT || '4.6097');
@@ -53,6 +49,8 @@ async function saveWeatherData(data) {
 async function getCurrentWeather() {
   try {
     console.log('Obteniendo datos meteorológicos actuales...');
+    console.log(`URL: ${WEATHER_API_URL}/weather, API Key: ${WEATHER_API_KEY ? WEATHER_API_KEY.substr(0, 4) + '...' : 'no definida'}`);
+    console.log(`Coordenadas: ${DEFAULT_LAT}, ${DEFAULT_LON}`);
     
     if (!WEATHER_API_KEY) {
       throw new Error('API key no configurada. Configure WEATHER_API_KEY en las variables de entorno.');
@@ -142,6 +140,7 @@ async function getCurrentWeather() {
     // Guardar en la base de datos
     try {
       await saveWeatherData(processedData);
+      console.log('Datos meteorológicos guardados en la base de datos correctamente');
     } catch (error) {
       console.warn('No se pudieron guardar los datos meteorológicos en la BD:', error.message);
     }
@@ -152,7 +151,20 @@ async function getCurrentWeather() {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error en getCurrentWeather:', error.response?.data || error.message);
+    console.error('Error en getCurrentWeather:');
+    // Mostrar información detallada del error
+    if (error.response) {
+      console.error('Respuesta de error:', {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: JSON.stringify(error.response.data, null, 2)
+      });
+    } else if (error.request) {
+      console.error('No se recibió respuesta:', error.request);
+    } else {
+      console.error('Error de configuración:', error.message);
+    }
+    console.error('Stack:', error.stack);
     
     // Si estamos en modo desarrollo o prueba, devolver datos simulados
     if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
@@ -188,6 +200,7 @@ async function getCurrentWeather() {
 async function getWeatherForecast(days = 5) {
   try {
     console.log('Obteniendo pronóstico meteorológico...');
+    console.log(`Días solicitados: ${days}`);
     
     if (!WEATHER_API_KEY) {
       throw new Error('API key no configurada. Configure WEATHER_API_KEY en las variables de entorno.');
@@ -223,7 +236,20 @@ async function getWeatherForecast(days = 5) {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error en getWeatherForecast:', error.message);
+    console.error('Error en getWeatherForecast:');
+    // Mostrar información detallada del error
+    if (error.response) {
+      console.error('Respuesta de error:', {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: JSON.stringify(error.response.data, null, 2)
+      });
+    } else if (error.request) {
+      console.error('No se recibió respuesta:', error.request);
+    } else {
+      console.error('Error de configuración:', error.message);
+    }
+    console.error('Stack:', error.stack);
     
     // Si estamos en desarrollo, generar datos de simulación
     if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
