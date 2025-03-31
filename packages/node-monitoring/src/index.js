@@ -294,18 +294,28 @@ app.get('/api/dashboard', async (req, res) => {
     // Obtener alertas activas
     const alerts = await alertService.getActiveAlerts();
     
-    // Obtener pronóstico de lluvia para las próximas 24 horas
-    const forecast = await weatherService.getWeatherForecast(1);
+    // Variable para almacenar el pronóstico de lluvia
+    let rainForecast = [];
     
-    // Calcular probabilidad de lluvia para las próximas 24 horas
-    const rainForecast = forecast.forecast
-      .filter(item => item.date.getTime() <= Date.now() + 24 * 60 * 60 * 1000)
-      .map(item => ({
-        hora: item.date.toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'}),
-        probabilidad: item.pop || 0,
-        intensidad: item.precipitation || 0,
-        descripcion: item.description
-      }));
+    try {
+      // Obtener pronóstico de lluvia para las próximas 24 horas
+      const forecast = await weatherService.getWeatherForecast(1);
+      
+      // Verificar que forecast.data.forecast existe y es un array
+      if (forecast && forecast.data && Array.isArray(forecast.data.forecast)) {
+        rainForecast = forecast.data.forecast
+          .filter(item => new Date(item.date).getTime() <= Date.now() + 24 * 60 * 60 * 1000)
+          .map(item => ({
+            hora: new Date(item.date).toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'}),
+            probabilidad: item.pop || 0,
+            intensidad: item.precipitation || 0,
+            descripcion: item.description || 'No disponible'
+          }));
+      }
+    } catch (forecastError) {
+      console.error('Error al obtener pronóstico:', forecastError);
+      // Continúa con el resto del dashboard sin el pronóstico
+    }
     
     res.json({
       timestamp: new Date().toISOString(),
@@ -323,6 +333,7 @@ app.get('/api/dashboard', async (req, res) => {
     });
   }
 });
+
 
 // Función para generar recomendaciones basadas en condiciones ambientales
 function generateRecommendations(airQuality, weather, alerts) {
