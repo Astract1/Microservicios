@@ -11,16 +11,16 @@ services:
       MYSQL_DATABASE: monitoreo_ambiental
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./database-schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "3306:3306"
     networks:
       - monitoreo-network
 
-  # Servicio principal de monitoreo ambiental
+  # Servicio backend de monitoreo ambiental
   monitoreo-ambiental:
     build:
-      context: .
+      context: ./node-monitoring
       dockerfile: Dockerfile
     container_name: monitoreo-ambiental-api
     restart: unless-stopped
@@ -39,7 +39,21 @@ services:
     networks:
       - monitoreo-network
 
-  # Opcional: Servicio para visualización de datos
+  # Nuevo servicio frontend de monitoreo ambiental
+  ui-monitoring:
+    build:
+      context: ./ui-monitoring
+      dockerfile: Dockerfile
+    container_name: monitoreo-ambiental-ui
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - monitoreo-ambiental
+    networks:
+      - monitoreo-network
+
+  # Servicio para visualización de datos
   grafana:
     image: grafana/grafana:latest
     container_name: monitoreo-ambiental-grafana
@@ -54,21 +68,6 @@ services:
       - grafana_data:/var/lib/grafana
     depends_on:
       - mariadb
-    networks:
-      - monitoreo-network
-
-  # Opcional: Proxy inverso para enrutar las peticiones
-  nginx:
-    image: nginx:latest
-    container_name: monitoreo-ambiental-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - monitoreo-ambiental
-      - grafana
     networks:
       - monitoreo-network
 
