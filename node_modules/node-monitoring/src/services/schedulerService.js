@@ -39,7 +39,8 @@ function startScheduledTasks() {
   cron.schedule('0 */6 * * *', async () => {
     console.log('Ejecutando tarea programada: actualización de pronóstico meteorológico');
     try {
-      await weatherService.getWeatherForecast();
+      // Corregido para pasar un valor explícito de días
+      await weatherService.getWeatherForecast(5);
       console.log('Pronóstico meteorológico actualizado');
     } catch (error) {
       console.error('Error en tarea programada de pronóstico:', error.message);

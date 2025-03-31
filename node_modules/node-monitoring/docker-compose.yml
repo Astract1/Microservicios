@@ -7,20 +7,20 @@ services:
     container_name: monitoreo-ambiental-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
       MYSQL_DATABASE: monitoreo_ambiental
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database-schema.sql:/docker-entrypoint-initdb.d/init.sql  # Ajustado
     ports:
       - "3306:3306"
     networks:
       - monitoreo-network
 
   # Servicio backend de monitoreo ambiental
-  monitoreo-ambiental:
+  monitoreo-ambiental-api:
     build:
-      context: ./node-monitoring
+      context: .  # Ajustado
       dockerfile: Dockerfile
     container_name: monitoreo-ambiental-api
     restart: unless-stopped
@@ -28,10 +28,10 @@ services:
       - NODE_ENV=production
       - DB_HOST=mariadb
       - DB_USER=root
-      - DB_PASSWORD=admin
+      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
-      - IQAIR_API_KEY=19f1c671-c320-4e74-b039-7cc087d4547e
-      - WEATHER_API_KEY=tu_api_key_aqui
+      - IQAIR_API_KEY=${IQAIR_API_KEY}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
     ports:
       - "3000:3000"
     depends_on:
@@ -39,19 +39,21 @@ services:
     networks:
       - monitoreo-network
 
-  # Nuevo servicio frontend de monitoreo ambiental
+  # Servicio frontend de monitoreo ambiental
   ui-monitoring:
     build:
-      context: ./ui-monitoring
+      context: ../ui-monitoring  # Ajustado
       dockerfile: Dockerfile
     container_name: monitoreo-ambiental-ui
     restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
-      - monitoreo-ambiental
+      - monitoreo-ambiental-api
     networks:
       - monitoreo-network
+    environment:
+      - REACT_APP_API_URL=/api
 
   # Servicio para visualización de datos
   grafana:
@@ -59,8 +61,8 @@ services:
     container_name: monitoreo-ambiental-grafana
     restart: unless-stopped
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
       - "3001:3000"
