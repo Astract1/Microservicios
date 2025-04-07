@@ -4,13 +4,15 @@
     "private": true,
     "description": "Microservicio de interfaz de usuario para el sistema de monitoreo ambiental",
     "dependencies": {
-        "axios": "^0.21.4",
+        "axios": "^1.8.4",
         "date-fns": "^2.29.3",
-        "react": "^17.0.2",
-        "react-dom": "^17.0.2",
+        "leaflet": "^1.9.4",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
         "react-icons": "^4.8.0",
+        "react-leaflet": "^5.0.0",
         "react-router-dom": "^6.10.0",
-        "react-scripts": "4.0.3",
+        "react-scripts": "^5.0.1",
         "recharts": "^2.5.0"
     },
     "scripts": {

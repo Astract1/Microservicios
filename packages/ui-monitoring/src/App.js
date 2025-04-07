@@ -7,6 +7,7 @@ import AirQualityPage from './components/AirQuality/AirQualityPage';
 import WeatherPage from './components/Weather/WeatherPage';
 import RainfallPage from './components/Rainfall/RainfallPage';
 import AlertsPage from './components/Alerts/AlertsPage';
+import MapView from './components/Map/MapView'; // Importamos el nuevo componente
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 
@@ -29,6 +30,7 @@ function App() {
               <Route path="/clima" element={<WeatherPage />} />
               <Route path="/precipitaciones" element={<RainfallPage />} />
               <Route path="/alertas" element={<AlertsPage />} />
+              <Route path="/mapa" element={<MapView />} />
             </Routes>
           </main>
           <Footer />

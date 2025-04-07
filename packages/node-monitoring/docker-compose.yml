@@ -73,6 +73,24 @@ services:
     networks:
       - monitoreo-network
 
+
+      #Phpmyadmin
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: monitoreo-ambiental-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: admin
+    ports:
+      - "8080:80"
+    networks:
+      - monitoreo-network
+
+
+
 volumes:
   mariadb_data:
   grafana_data:

@@ -32,13 +32,14 @@ const Navbar = () => {
     return location.pathname === path;
   };
 
-  // Menú de navegación
+  // Menú de navegación actualizado con el enlace al Mapa
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/calidad-aire', label: 'Calidad del Aire', icon: '💨' },
     { path: '/clima', label: 'Clima', icon: '☁️' },
     { path: '/precipitaciones', label: 'Precipitaciones', icon: '💧' },
-    { path: '/alertas', label: 'Alertas', icon: '🚨' }
+    { path: '/alertas', label: 'Alertas', icon: '🚨' },
+    { path: '/mapa', label: 'Mapa', icon: '🗺️' }
   ];
 
   // Estilo para enlaces activos
