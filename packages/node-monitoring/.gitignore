@@ -7,3 +7,5 @@
 
 # Archivos temporales
 tmp/
+
+/node_modules
