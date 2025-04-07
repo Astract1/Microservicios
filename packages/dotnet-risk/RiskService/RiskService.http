@@ -1,6 +1,14 @@
-@RiskService_HostAddress = http://localhost:5128
+POST http://localhost:5128/api/risk/evaluate
+Content-Type: application/json
 
-GET {{RiskService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
+{
+    "userData": {
+        "age": 30,
+        "medicalConditions": ["asma", "hipertensión"]
+    },
+    "environmentalData": {
+        "temperature": 38,
+        "humidity": 70,
+        "airQualityIndex": 120
+    }
+}

@@ -8424,7 +8424,7 @@ node-cron@^3.0.3:
   dependencies:
     uuid "8.3.2"
 
-"node-education@file:C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\node-education":
+"node-education@file:C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\node-education":
   version "1.0.0"
   resolved "file:packages/node-education"
 
@@ -8467,7 +8467,7 @@ node-libs-browser@^2.2.1:
     util "^0.11.0"
     vm-browserify "^1.0.1"
 
-"node-monitoring@file:C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\node-monitoring":
+"node-monitoring@file:C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\node-monitoring":
   version "1.0.0"
   resolved "file:packages/node-monitoring"
   dependencies:
@@ -8500,7 +8500,7 @@ node-releases@^2.0.19:
   resolved "https://registry.npmjs.org/node-releases/-/node-releases-2.0.19.tgz"
   integrity sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==
 
-"node-service@file:C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\node-service":
+"node-service@file:C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\node-service":
   version "1.0.0"
   resolved "file:packages/node-service"
   dependencies:
@@ -10384,7 +10384,7 @@ react@*, react@^17.0.2, react@17.0.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
 
-"react@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.5.1 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.3.1, "react@>= 16", react@>=16.6.0, react@>=16.8:
+"react@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.3.1, "react@>= 16", react@>=16.6.0, react@>=16.8:
   version "18.3.1"
   resolved "https://registry.npmjs.org/react/-/react-18.3.1.tgz"
   integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
@@ -12352,7 +12352,7 @@ typedarray@^0.0.6:
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.9.5.tgz"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
-"ui-monitoring@file:C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\ui-monitoring":
+"ui-monitoring@file:C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\ui-monitoring":
   version "1.0.0"
   resolved "file:packages/ui-monitoring"
   dependencies:
