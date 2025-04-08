@@ -1,0 +1,6 @@
+services:
+  dotnet-risk:
+    environment:
+      - DATABASE_CONNECTION=Data Source=/data/RiskService.db
+    volumes:
+      - ./packages/dotnet-risk/RiskService.db:/data/RiskService.db
