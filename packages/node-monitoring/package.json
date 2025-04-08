@@ -14,7 +14,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "audit": "npm audit fix"
+    "audit": "npm audit fix",
+    "build": "echo 'Build process completed'"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

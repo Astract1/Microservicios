@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # Servicio de base de datos
+  mariadb:
+    image: mariadb:10.6
+    container_name: monitoreo-ambiental-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+      MYSQL_DATABASE: monitoreo_ambiental
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database-schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./packages/node-education/database-schema.sql:/docker-entrypoint-initdb.d/init-education.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - monitoreo-network
+
+  # Servicio backend de monitoreo ambiental
+  monitoreo-ambiental-api:
+    build:
+      context: ./packages/node-monitoring
+      dockerfile: Dockerfile
+    container_name: monitoreo-ambiental-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mariadb
+      - DB_USER=root
+      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
+      - DB_DATABASE=monitoreo_ambiental
+      - IQAIR_API_KEY=${IQAIR_API_KEY}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mariadb
+    networks:
+      - monitoreo-network
+
+  # Servicio de educación ambiental
+  educacion-ambiental-api:
+    build:
+      context: ./packages/node-education
+      dockerfile: Dockerfile
+    container_name: educacion-ambiental-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DB_HOST=mariadb
+      - DB_USER=root
+      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
+      - DB_DATABASE=monitoreo_ambiental
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mariadb
+      - monitoreo-ambiental-api
+    networks:
+      - monitoreo-network
+
+  # Servicio frontend de monitoreo ambiental
+  ui-monitoring:
+    build:
+      context: ../ui-monitoring
+      dockerfile: Dockerfile
+    container_name: monitoreo-ambiental-ui
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - monitoreo-ambiental-api
+      - educacion-ambiental-api
+    networks:
+      - monitoreo-network
+    environment:
+      - REACT_APP_API_URL=/api
+      - REACT_APP_EDUCATION_API_URL=/education-api
+
+  # Servicio para visualización de datos
+  grafana:
+    image: grafana/grafana:latest
+    container_name: monitoreo-ambiental-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - mariadb
+    networks:
+      - monitoreo-network
+
+  # Phpmyadmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: monitoreo-ambiental-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: admin
+    ports:
+      - "8080:80"
+    networks:
+      - monitoreo-network
+
+volumes:
+  mariadb_data:
+  grafana_data:
+
+networks:
+  monitoreo-network:
+    driver: bridge
