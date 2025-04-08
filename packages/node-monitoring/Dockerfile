@@ -1,9 +1,23 @@
-﻿# Etapa de producción - usando directamente Nginx
-FROM nginx:alpine
+﻿# Etapa de construcción
+FROM node:18-alpine
 
-# Crear un archivo index.html básico
-RUN echo '<!DOCTYPE html><html><head><title>Monitoreo Ambiental</title></head><body><h1>Sistema de Monitoreo Ambiental</h1><p>Versión 1.0</p></body></html>' > /usr/share/nginx/html/index.html
+# Establecer directorio de trabajo
+WORKDIR /app
 
-EXPOSE 80
+# Variables de entorno
+ENV NODE_ENV=production
 
-CMD ["nginx", "-g", "daemon off;"]
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar resto del código
+COPY . .
+
+# Puerto de exposición
+EXPOSE 3000
+
+# Comando para iniciar el servicio
+CMD ["node", "src/index.js"]

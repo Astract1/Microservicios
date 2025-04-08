@@ -1,46 +1,47 @@
+# Configuración de Docker Compose para Microservicios de Monitoreo Ambiental
 version: '3.8'
 
 services:
-  # Servicio de base de datos
+  # Servicio de Base de Datos MariaDB
   mariadb:
-    image: mariadb:10.6
-    container_name: monitoreo-ambiental-db
-    restart: unless-stopped
+    image: mariadb:10.6                        # Imagen oficial de MariaDB
+    container_name: monitoreo-ambiental-db     # Nombre del contenedor
+    restart: unless-stopped                    # Política de reinicio
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
-      MYSQL_DATABASE: monitoreo_ambiental
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}  # Contraseña de root configurable
+      MYSQL_DATABASE: monitoreo_ambiental      # Base de datos inicial
     volumes:
-      - mariadb_data:/var/lib/mysql
-      - ./packages/node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - mariadb_data:/var/lib/mysql            # Volumen persistente para datos
+      - ./packages/node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/init-monitoring.sql
       - ./packages/node-education/database-schema.sql:/docker-entrypoint-initdb.d/init-education.sql
     ports:
-      - "3306:3306"
+      - "3306:3306"                            # Mapeo de puerto para conexiones externas
     networks:
-      - monitoreo-network
+      - monitoreo-network                      # Red personalizada
 
-  # Servicio backend de monitoreo ambiental
+  # Servicio Backend de Monitoreo Ambiental
   monitoreo-ambiental-api:
     build:
-      context: ./packages/node-monitoring
-      dockerfile: Dockerfile
+      context: ./packages/node-monitoring      # Contexto de construcción
+      dockerfile: Dockerfile                   # Dockerfile para construir la imagen
     container_name: monitoreo-ambiental-api
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - DB_HOST=mariadb
+      - NODE_ENV=production                    # Entorno de producción
+      - DB_HOST=mariadb                        # Host de base de datos
       - DB_USER=root
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
-      - IQAIR_API_KEY=${IQAIR_API_KEY}
+      - IQAIR_API_KEY=${IQAIR_API_KEY}      
       - WEATHER_API_KEY=${WEATHER_API_KEY}
     ports:
-      - "3000:3000"
+      - "3000:3000"                            # Puerto de la API
     depends_on:
-      - mariadb
+      - mariadb                                # Depende del servicio de base de datos
     networks:
       - monitoreo-network
 
-  # Servicio de educación ambiental
+  # Servicio de Educación Ambiental
   educacion-ambiental-api:
     build:
       context: ./packages/node-education
@@ -54,6 +55,7 @@ services:
       - DB_USER=root
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
+      - MONITORING_API_URL=http://monitoreo-ambiental-api:3000/api
     ports:
       - "3002:3002"
     depends_on:
@@ -62,13 +64,62 @@ services:
     networks:
       - monitoreo-network
 
-  # Aquí puedes añadir los otros servicios de tu docker-compose.yml original
-  # como grafana, phpmyadmin, etc.
+  # Interfaz de Usuario de Monitoreo
+  ui-monitoring:
+    build:
+      context: ./packages/ui-monitoring
+      dockerfile: Dockerfile
+    container_name: monitoreo-ambiental-ui
+    restart: unless-stopped
+    ports:
+      - "80:80"                                # Puerto web estándar
+    depends_on:
+      - monitoreo-ambiental-api
+      - educacion-ambiental-api
+    networks:
+      - monitoreo-network
+    environment:
+      - REACT_APP_API_URL=/api
+      - REACT_APP_EDUCATION_API_URL=/education-api
 
+  # Servicio de Visualización de Datos (Grafana)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: monitoreo-ambiental-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - mariadb
+    networks:
+      - monitoreo-network
+
+  # Herramienta de Administración de Base de Datos
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: monitoreo-ambiental-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: admin
+    ports:
+      - "8080:80"
+    networks:
+      - monitoreo-network
+
+# Volúmenes persistentes
 volumes:
-  mariadb_data:
-  # Añade aquí otros volúmenes de tu configuración original
+  mariadb_data:     # Almacenamiento de datos de MariaDB
+  grafana_data:     # Almacenamiento de configuraciones de Grafana
 
+# Red personalizada para comunicación entre servicios
 networks:
   monitoreo-network:
-    driver: bridge
+    driver: bridge   # Controlador de red por defecto

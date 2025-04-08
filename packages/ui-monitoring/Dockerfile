@@ -18,7 +18,6 @@ COPY . .
 # Construir la aplicación
 RUN npm run build
 
-
 # Etapa de producción con Nginx
 FROM nginx:alpine
 

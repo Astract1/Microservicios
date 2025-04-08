@@ -1,15 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';  
-//import './styles/tailwind-basic.css'; 
-import './styles/index.css'
-import App from './App';
-// Eliminar esta línea
-// const root = ReactDOM.createRoot(document.getElementById('root'));
+import ReactDOM from 'react-dom/client';
+import './styles/index.css';
+import App from './App.js';
 
-// Reemplazar con el método antiguo de renderizado
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );
