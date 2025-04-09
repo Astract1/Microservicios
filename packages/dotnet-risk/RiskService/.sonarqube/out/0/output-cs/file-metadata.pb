@@ -1,0 +1,20 @@
+ô
+çC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\obj\Debug\net9.0\RiskService.MvcApplicationPartsAssemblyInfo.csutf-8Ö
+zC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\obj\Debug\net9.0\RiskService.AssemblyInfo.csutf-8ô
+çC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\obj\Debug\net9.0\.NETCoreApp,Version=v9.0.AssemblyAttributes.csutf-8á
+|C:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\obj\Debug\net9.0\RiskService.GlobalUsings.g.csutf-8x
+oC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Services\RiskEvaluationService.csutf-8a
+XC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Program.csutf-8i
+`C:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Models\UserData.csutf-8k
+bC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Models\RiskResult.csutf-8u
+lC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Models\RiskEvaluationResult.csutf-8r
+iC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Models\EnvironmentalData.csutf-8Å
+vC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Migrations\RiskDbContextModelSnapshot.csutf-8ê
+ÑC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Migrations\20250409014847_InitialMigration.Designer.csutf-8Ñ
+{C:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Migrations\20250409014847_InitialMigration.csutf-8j
+aC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\DTOs\UserDataDTO.csutf-8p
+gC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\DTOs\RiskEvaluationDto.csutf-8s
+jC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\DTOs\EnvironmentalDataDto.csutf-8r
+iC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Data\WeatherDataProvider.csutf-8l
+cC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Data\RiskDbContext.csutf-8t
+kC:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\Controllers\RiskController.csutf-8

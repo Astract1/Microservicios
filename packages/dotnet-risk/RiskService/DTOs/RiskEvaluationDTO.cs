@@ -1,8 +1,8 @@
 namespace RiskService.DTOs
 {
-    public class RiskEvaluationDTO
+    public class RiskEvaluationDto
     {
-        public UserDataDTO UserData { get; set; } // Datos del usuario
-        public EnvironmentalDataDTO EnvironmentalData { get; set; } // Datos ambientales
+        public required UserDataDto UserData { get; set; } // Datos del usuario
+        public required EnvironmentalDataDto EnvironmentalData { get; set; } // Datos ambientales
     }
 }

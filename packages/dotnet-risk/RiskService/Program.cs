@@ -26,7 +26,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<RiskDbContext>();
     try
     {
-        dbContext.Database.Migrate(); // Aplicar migraciones
+        await dbContext.Database.MigrateAsync(); 
         Console.WriteLine("Migraciones aplicadas correctamente.");
     }
     catch (Exception ex)
@@ -38,4 +38,6 @@ using (var scope = app.Services.CreateScope())
 // Configurar middleware
 app.UseRouting();
 app.MapControllers();
-app.Run();
+
+// Ejecutar la app de forma asincrónica
+await app.RunAsync(); 

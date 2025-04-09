@@ -13,14 +13,14 @@ builder.Services.AddDbContext<PreventionDbContext>(options =>
 
 var app = builder.Build();
 
-// Aplicar migraciones automáticamente
+// Aplicar migraciones automáticamente de forma asincrónica
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<PreventionDbContext>();
-    dbContext.Database.Migrate();
+    await dbContext.Database.MigrateAsync();
 }
 
 // Configurar middleware
 app.UseRouting();
 app.MapControllers();
-app.Run();
+await app.RunAsync();

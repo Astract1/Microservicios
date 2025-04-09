@@ -20,9 +20,19 @@ namespace RiskService.Controllers
         }
 
         [HttpPost("evaluate")]
-        public IActionResult EvaluateRisk([FromBody] RiskEvaluationDTO request)
+        public IActionResult EvaluateRisk([FromBody] RiskEvaluationDto request)
         {
-            // Convertir los DTOs a los modelos internos
+            // Validar que los datos requeridos no sean nulos
+            if (request.UserData == null ||
+                request.EnvironmentalData == null ||
+                !request.EnvironmentalData.Temperature.HasValue ||
+                !request.EnvironmentalData.Humidity.HasValue ||
+                !request.EnvironmentalData.AirQualityIndex.HasValue)
+            {
+                return BadRequest("Faltan datos necesarios para la evaluación del riesgo.");
+            }
+
+            // Convertir los DTOs a modelos internos
             var userData = new UserData
             {
                 Age = request.UserData.Age,
@@ -31,9 +41,9 @@ namespace RiskService.Controllers
 
             var environmentalData = new EnvironmentalData
             {
-                Temperature = request.EnvironmentalData.Temperature,
-                Humidity = request.EnvironmentalData.Humidity,
-                AirQualityIndex = request.EnvironmentalData.AirQualityIndex
+                Temperature = request.EnvironmentalData.Temperature.Value,
+                Humidity = request.EnvironmentalData.Humidity.Value,
+                AirQualityIndex = request.EnvironmentalData.AirQualityIndex.Value
             };
 
             // Evaluar el riesgo

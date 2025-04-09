@@ -1,0 +1,6 @@
+projectKey=monitoring
+serverUrl=http://localhost:9000
+serverVersion=25.3.0.104237
+dashboardUrl=http://localhost:9000/dashboard?id=monitoring
+ceTaskId=c247bec7-1a33-4a63-9781-68a7a1e2e393
+ceTaskUrl=http://localhost:9000/api/ce/task?id=c247bec7-1a33-4a63-9781-68a7a1e2e393

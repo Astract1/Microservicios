@@ -1,0 +1,6 @@
+projectKey=Prevention
+serverUrl=http://localhost:9000
+serverVersion=25.3.0.104237
+dashboardUrl=http://localhost:9000/dashboard?id=Prevention
+ceTaskId=b2599f86-ddd8-4d17-9c99-f0a62724896f
+ceTaskUrl=http://localhost:9000/api/ce/task?id=b2599f86-ddd8-4d17-9c99-f0a62724896f

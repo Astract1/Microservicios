@@ -1,4 +1,3 @@
-// filepath: c:\Users\kjsvb\OneDrive\Escritorio\Microservicios\packages\dotnet-prevention\PreventionService\Services\RiskServiceClient.cs
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -24,7 +23,7 @@ namespace PreventionService.Services
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<RiskEvaluationResult>(content);
+            return JsonSerializer.Deserialize<RiskEvaluationResult>(content)!;
         }
     }
 }

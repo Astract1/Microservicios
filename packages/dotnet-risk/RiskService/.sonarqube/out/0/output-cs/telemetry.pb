@@ -1,0 +1,1 @@
+vR`C:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\RiskService.csproj¢net9.0òCSharp13

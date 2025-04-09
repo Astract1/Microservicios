@@ -3114,29 +3114,31 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\kjsvb\\.nuget\\packages\\": {},
+    "C:\\Users\\Juan Jimenez\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
+      "projectUniqueName": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
       "projectName": "PreventionService",
-      "projectPath": "C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
-      "packagesPath": "C:\\Users\\kjsvb\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kjsvb\\OneDrive\\Escritorio\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\obj\\",
+      "projectPath": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
+      "packagesPath": "C:\\Users\\Juan Jimenez\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\kjsvb\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        "C:\\Users\\Juan Jimenez\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

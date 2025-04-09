@@ -1,0 +1,1 @@
+C:\Users\Juan Jimenez\Desktop\Microservicios\packages\dotnet-risk\RiskService\.sonarqube\out\0

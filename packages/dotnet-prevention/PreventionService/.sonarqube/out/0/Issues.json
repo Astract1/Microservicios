@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Compilador de Microsoft (R) Visual C#",
+        "version": "4.13.0.0",
+        "fileVersion": "4.13.0-3.25155.17 (398aa319)",
+        "semanticVersion": "4.13.0",
+        "language": "es-MX"
+      },
+      "results": [
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "El elemento propiedad \"Preventions\" que no acepta valores NULL debe contener un valor distinto de NULL al salir del constructor. Considere la posibilidad de agregar el modificador \"required'\"o declarar el propiedad como un valor que acepta valores NULL.",
+          "suppressionStates": [
+            "suppressedInSource"
+          ],
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/Juan%20Jimenez/Desktop/Microservicios/packages/dotnet-prevention/PreventionService/Data/PreventionDbContext.cs",
+                "region": {
+                  "startLine": 7,
+                  "startColumn": 16,
+                  "endLine": 7,
+                  "endColumn": 35
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/Juan%20Jimenez/Desktop/Microservicios/packages/dotnet-prevention/PreventionService/Data/PreventionDbContext.cs",
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 34,
+                  "endLine": 10,
+                  "endColumn": 45
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        },
+        {
+          "ruleId": "S2325",
+          "level": "warning",
+          "message": "Make 'Configure' a static method.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/Juan%20Jimenez/Desktop/Microservicios/packages/dotnet-prevention/PreventionService/Startup.cs",
+                "region": {
+                  "startLine": 46,
+                  "startColumn": 21,
+                  "endLine": 46,
+                  "endColumn": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        }
+      ],
+      "rules": {
+        "CS8618": {
+          "id": "CS8618",
+          "shortDescription": "Un campo que no acepta valores NULL debe contener un valor distinto de NULL al salir del constructor. Considere la posibilidad de agregar el modificador \"required\" o declararlo como un valor que acepta valores NULL.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8618)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        },
+        "S2325": {
+          "id": "S2325",
+          "shortDescription": "Methods and properties that don't access instance data should be static",
+          "fullDescription": "Methods and properties that don’t access instance data should be marked as static for the following reasons:",
+          "defaultLevel": "warning",
+          "helpUri": "https://rules.sonarsource.com/csharp/RSPEC-2325",
+          "properties": {
+            "category": "Minor Code Smell",
+            "isEnabledByDefault": true,
+            "tags": [
+              "C#",
+              "MainSourceScope",
+              "TestSourceScope",
+              "SonarWay"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

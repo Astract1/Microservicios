@@ -15,21 +15,32 @@ namespace PreventionService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Configurar controladores
             services.AddControllers();
 
-            // Configurar cliente HTTP para comunicarse con dotnet-risk
+            // Obtener y validar la URL de la API externa
+            var riskApiUrl = _configuration["DOTNET_RISK_API_URL"];
+            if (string.IsNullOrWhiteSpace(riskApiUrl))
+            {
+                throw new InvalidOperationException("La URL para DOTNET_RISK_API_URL no está configurada en appsettings.");
+            }
+
+            // Configurar cliente HTTP con la URL verificada
             services.AddHttpClient<RiskServiceClient>(client =>
             {
-                client.BaseAddress = new Uri(_configuration["DOTNET_RISK_API_URL"]);
+                client.BaseAddress = new Uri(riskApiUrl);
             });
 
-            // Configurar servicios
             services.AddScoped<RecommendationService>();
 
-            // Configurar base de datos
+            // Obtener y validar la cadena de conexión
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException("La cadena de conexión 'DefaultConnection' no está configurada.");
+            }
+
             services.AddDbContext<PreventionDbContext>(options =>
-                options.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlite(connectionString));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

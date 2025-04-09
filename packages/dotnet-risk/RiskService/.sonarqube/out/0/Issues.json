@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Compilador de Microsoft (R) Visual C#",
+        "version": "4.13.0.0",
+        "fileVersion": "4.13.0-3.25155.17 (398aa319)",
+        "semanticVersion": "4.13.0",
+        "language": "es-MX"
+      },
+      "results": [
+        {
+          "ruleId": "CS8618",
+          "level": "warning",
+          "message": "El elemento propiedad \"RiskResults\" que no acepta valores NULL debe contener un valor distinto de NULL al salir del constructor. Considere la posibilidad de agregar el modificador \"required'\"o declarar el propiedad como un valor que acepta valores NULL.",
+          "suppressionStates": [
+            "suppressedInSource"
+          ],
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/Juan%20Jimenez/Desktop/Microservicios/packages/dotnet-risk/RiskService/Data/RiskDbContext.cs",
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 16,
+                  "endLine": 8,
+                  "endColumn": 29
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "uri": "file:///C:/Users/Juan%20Jimenez/Desktop/Microservicios/packages/dotnet-risk/RiskService/Data/RiskDbContext.cs",
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 34,
+                  "endLine": 11,
+                  "endColumn": 45
+                }
+              }
+            }
+          ],
+          "properties": {
+            "warningLevel": 1
+          }
+        }
+      ],
+      "rules": {
+        "CS8618": {
+          "id": "CS8618",
+          "shortDescription": "Un campo que no acepta valores NULL debe contener un valor distinto de NULL al salir del constructor. Considere la posibilidad de agregar el modificador \"required\" o declararlo como un valor que acepta valores NULL.",
+          "defaultLevel": "warning",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8618)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

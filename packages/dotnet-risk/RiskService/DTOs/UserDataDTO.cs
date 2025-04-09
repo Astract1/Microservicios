@@ -1,8 +1,8 @@
 namespace RiskService.DTOs
 {
-    public class UserDataDTO
+    public class UserDataDto
     {
-        public int Age { get; set; } // Edad del usuario
-        public string[] MedicalConditions { get; set; } // Condiciones médicas del usuario
+        public required int Age { get; set; } // Edad del usuario
+        public required string[] MedicalConditions { get; set; } // Condiciones médicas del usuario
     }
 }
