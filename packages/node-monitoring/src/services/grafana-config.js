@@ -40,7 +40,7 @@ async function rotateGrafanaToken() {
       }
     });
     
-    if (!tokenResponse.data || !tokenResponse.data.key) {
+    if (!tokenResponse?.data?.key) {
       throw new Error('No se pudo generar un nuevo token');
     }
     

@@ -12,6 +12,12 @@ const DEFAULT_COUNTRY = process.env.DEFAULT_COUNTRY || 'Colombia';
 const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LAT || '4.6097');
 const DEFAULT_LON = parseFloat(process.env.DEFAULT_LON || '-74.0817');
 
+// Función auxiliar para generar números aleatorios en un rango para datos de simulación
+function getRandomForSimulation(min, max) {
+  // Seguro para datos de simulación, no se usa para fines de seguridad
+  return min + Math.random() * (max - min);
+}
+
 // Función para guardar datos en la base de datos
 const pool = require('../db');
 
@@ -43,7 +49,7 @@ async function saveAirQualityData(data) {
 async function getAirQualityData() {
   try {
     console.log('Intentando obtener datos de calidad del aire con IQAir...');
-    console.log(`URL: ${BASE_URL}/city, API Key: ${API_KEY ? API_KEY.substr(0, 4) + '...' : 'no definida'}`);
+    console.log(`URL: ${BASE_URL}/city, API Key: ${API_KEY ? API_KEY.substring(0, 4) + '...' : 'no definida'}`);
     console.log(`Ciudad: ${DEFAULT_CITY}, Estado: ${DEFAULT_STATE}, País: ${DEFAULT_COUNTRY}`);
     
     if (!API_KEY) {
@@ -107,9 +113,9 @@ async function getAirQualityData() {
       console.log('Generando datos simulados para desarrollo');
       const mockData = {
         city: DEFAULT_CITY,
-        aqi: 45 + Math.random() * 30,
-        temperature: 18 + Math.random() * 5,
-        humidity: 60 + Math.random() * 20,
+        aqi: getRandomForSimulation(45, 75),
+        temperature: getRandomForSimulation(18, 23),
+        humidity: getRandomForSimulation(60, 80),
         timestamp: new Date(),
         source: 'Simulado'
       };
@@ -124,6 +130,7 @@ async function getAirQualityData() {
     throw error;
   }
 }
+
 async function getAirQualityStations() {
   try {
     if (!API_KEY) {
@@ -236,9 +243,9 @@ async function getAirQualityByNeighborhoods() {
     for (let i = samplesToTake; i < neighborhoods.length; i++) {
       results.push({
         name: neighborhoods[i].name,
-        aqi: Math.floor(40 + Math.random() * 30),
-        temperature: Math.floor(18 + Math.random() * 5),
-        humidity: Math.floor(60 + Math.random() * 20),
+        aqi: Math.floor(getRandomForSimulation(40, 70)),
+        temperature: Math.floor(getRandomForSimulation(18, 23)),
+        humidity: Math.floor(getRandomForSimulation(60, 80)),
         simulated: true
       });
     }
@@ -256,9 +263,9 @@ async function getAirQualityByNeighborhoods() {
     return {
       data: neighborhoods.map(n => ({
         name: n.name,
-        aqi: Math.floor(40 + Math.random() * 30),
-        temperature: Math.floor(18 + Math.random() * 5),
-        humidity: Math.floor(60 + Math.random() * 20),
+        aqi: Math.floor(getRandomForSimulation(40, 70)),
+        temperature: Math.floor(getRandomForSimulation(18, 23)),
+        humidity: Math.floor(getRandomForSimulation(60, 80)),
         simulated: true
       })),
       fullySimulated: true,
@@ -294,9 +301,9 @@ async function getHistoricalData(days = 7) {
       
       simulatedData.push({
         city: DEFAULT_CITY,
-        aqi: 40 + Math.floor(Math.random() * 30),
-        temperature: 18 + Math.floor(Math.random() * 5),
-        humidity: 60 + Math.floor(Math.random() * 20),
+        aqi: 40 + Math.floor(getRandomForSimulation(0, 30)),
+        temperature: 18 + Math.floor(getRandomForSimulation(0, 5)),
+        humidity: 60 + Math.floor(getRandomForSimulation(0, 20)),
         timestamp: date,
         source: 'Simulado'
       });
@@ -337,7 +344,6 @@ function evaluateAirQualityAlert(aqi) {
   
   return { alertLevel: 'none', message: '' };
 }
-
 
 module.exports = {
   getAirQualityData,

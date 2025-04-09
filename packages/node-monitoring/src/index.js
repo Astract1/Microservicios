@@ -394,7 +394,7 @@ app.get('/api/dashboard', async (req, res) => {
       const forecast = await weatherService.getWeatherForecast(1);
       
       // Verificar que forecast.data.forecast existe y es un array
-      if (forecast && forecast.data && Array.isArray(forecast.data.forecast)) {
+      if (forecast?.data?.forecast && Array.isArray(forecast.data.forecast)) {
         rainForecast = forecast.data.forecast
           .filter(item => new Date(item.date).getTime() <= Date.now() + 24 * 60 * 60 * 1000)
           .map(item => ({

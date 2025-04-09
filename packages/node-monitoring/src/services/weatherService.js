@@ -14,6 +14,12 @@ const DEFAULT_CITY = process.env.DEFAULT_CITY || 'Bogota';
 const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LAT || '4.6097');
 const DEFAULT_LON = parseFloat(process.env.DEFAULT_LON || '-74.0817');
 
+// Función auxiliar para generar números aleatorios en un rango para datos de simulación
+function getRandomForSimulation(min, max) {
+  // Seguro para datos de simulación, no se usa para fines de seguridad
+  return min + Math.random() * (max - min);
+}
+
 // Función para guardar datos meteorológicos en la base de datos
 async function saveWeatherData(data) {
   const connection = await pool.getConnection();
@@ -45,97 +51,140 @@ async function saveWeatherData(data) {
   }
 }
 
-// Obtener datos meteorológicos actuales
-async function getCurrentWeather() {
-  try {
-    console.log('Obteniendo datos meteorológicos actuales...');
-    console.log(`URL: ${WEATHER_API_URL}/weather, API Key: ${WEATHER_API_KEY ? WEATHER_API_KEY.substr(0, 4) + '...' : 'no definida'}`);
-    console.log(`Coordenadas: ${DEFAULT_LAT}, ${DEFAULT_LON}`);
-    
-    if (!WEATHER_API_KEY) {
-      throw new Error('API key no configurada. Configure WEATHER_API_KEY en las variables de entorno.');
+// Funciones auxiliares para reducir la complejidad cognitiva
+async function fetchWeatherData() {
+  if (!WEATHER_API_KEY) {
+    throw new Error('API key no configurada. Configure WEATHER_API_KEY en las variables de entorno.');
+  }
+  
+  return await axios.get(`${WEATHER_API_URL}/weather`, {
+    params: {
+      lat: DEFAULT_LAT,
+      lon: DEFAULT_LON,
+      appid: WEATHER_API_KEY,
+      units: 'metric'
     }
-    
-    // Primera llamada para obtener datos generales
-    const response = await axios.get(`${WEATHER_API_URL}/weather`, {
+  });
+}
+
+async function fetchRainData() {
+  let rainData = 0;
+  
+  try {
+    const rainResponse = await axios.get(`${WEATHER_API_URL}/forecast`, {
       params: {
         lat: DEFAULT_LAT,
         lon: DEFAULT_LON,
         appid: WEATHER_API_KEY,
-        units: 'metric'
+        units: 'metric',
+        cnt: 1 // Solo necesitamos el pronóstico más reciente
       }
     });
     
-    // Procesamos los datos básicos
-    const data = response.data;
-    
-    // En lugar de usar onecall, usaremos el endpoint de forecast que sabemos que funciona
-    // Según los logs, el endpoint de forecast está devolviendo datos correctamente
-    let rainData = 0;
-    try {
-      const rainResponse = await axios.get(`${WEATHER_API_URL}/forecast`, {
-        params: {
-          lat: DEFAULT_LAT,
-          lon: DEFAULT_LON,
-          appid: WEATHER_API_KEY,
-          units: 'metric',
-          cnt: 1 // Solo necesitamos el pronóstico más reciente
-        }
-      });
-      
-      // Calculamos precipitación en mm desde el forecast
-      if (rainResponse.data.list && rainResponse.data.list.length > 0) {
-        // Si hay datos de lluvia, los usamos (dividimos por 3 porque son datos de 3h)
-        if (rainResponse.data.list[0].rain && rainResponse.data.list[0].rain['3h']) {
-          rainData = rainResponse.data.list[0].rain['3h'] / 3;
-        } 
-        // Si no hay datos de lluvia pero hay probabilidad, estimamos un valor basado en la probabilidad
-        else if (rainResponse.data.list[0].pop > 0) {
-          rainData = rainResponse.data.list[0].pop * 0.5; // Estimación simple basada en probabilidad
-        }
-      }
-      
-      console.log(`Datos de precipitación obtenidos del forecast: ${rainData}mm/h`);
-    } catch (error) {
-      console.error('Error obteniendo datos específicos de lluvia:', error.message);
-      
-      // Intentamos un método alternativo si el primer endpoint no funciona
-      try {
-        const rainFallback = await axios.get(`${WEATHER_API_URL}/forecast`, {
-          params: {
-            lat: DEFAULT_LAT,
-            lon: DEFAULT_LON,
-            appid: WEATHER_API_KEY,
-            units: 'metric',
-            cnt: 1 // Solo necesitamos el pronóstico más reciente
-          }
-        });
-        
-        if (rainFallback.data.list && rainFallback.data.list.length > 0) {
-          rainData = rainFallback.data.list[0].rain ? rainFallback.data.list[0].rain['3h'] / 3 || 0 : 0;
-        }
-      } catch (fallbackError) {
-        console.warn('Error en método alternativo para datos de lluvia:', fallbackError.message);
-        // Intentamos usar datos de lluvia de la primera llamada si están disponibles
-        rainData = data.rain ? data.rain['1h'] || 0 : 0;
+    if (rainResponse?.data?.list?.length > 0) {
+      if (rainResponse.data.list[0]?.rain?.['3h']) {
+        rainData = rainResponse.data.list[0].rain['3h'] / 3;
+      } else if (rainResponse.data.list[0]?.pop > 0) {
+        rainData = rainResponse.data.list[0].pop * 0.5;
       }
     }
     
-    // Formato final de los datos
-    const processedData = {
-      city: data.name,
-      temperature: data.main.temp,
-      humidity: data.main.humidity,
-      windSpeed: data.wind.speed,
-      windDirection: data.wind.deg,
-      precipitation: rainData,
-      uvIndex: data.uvi || 0, // Nota: uvi podría no estar disponible en este endpoint
-      pressure: data.main.pressure,
-      weatherDescription: data.weather[0].description,
-      weatherIcon: data.weather[0].icon,
-      source: 'OpenWeatherMap',
-      timestamp: new Date()
-    };
+    console.log(`Datos de precipitación obtenidos del forecast: ${rainData}mm/h`);
+  } catch (error) {
+    console.error('Error obteniendo datos específicos de lluvia:', error.message);
+    rainData = await fetchFallbackRainData(error);
+  }
+  
+  return rainData;
+}
+
+async function fetchFallbackRainData(originalError) {
+  try {
+    const rainFallback = await axios.get(`${WEATHER_API_URL}/forecast`, {
+      params: {
+        lat: DEFAULT_LAT,
+        lon: DEFAULT_LON,
+        appid: WEATHER_API_KEY,
+        units: 'metric',
+        cnt: 1
+      }
+    });
+    
+    if (rainFallback?.data?.list?.length > 0) {
+      return rainFallback.data.list[0]?.rain?.['3h'] / 3 || 0;
+    }
+    return 0;
+  } catch (fallbackError) {
+    console.warn('Error en método alternativo para datos de lluvia:', fallbackError.message);
+    return 0; // Si no tenemos datos, retornamos 0
+  }
+}
+
+function processWeatherData(data, rainData) {
+  return {
+    city: data.name,
+    temperature: data.main.temp,
+    humidity: data.main.humidity,
+    windSpeed: data.wind.speed,
+    windDirection: data.wind.deg,
+    precipitation: rainData,
+    uvIndex: data.uvi || 0,
+    pressure: data.main.pressure,
+    weatherDescription: data.weather[0].description,
+    weatherIcon: data.weather[0].icon,
+    source: 'OpenWeatherMap',
+    timestamp: new Date()
+  };
+}
+
+function createMockWeatherData() {
+  return {
+    city: DEFAULT_CITY,
+    temperature: getRandomForSimulation(20, 30),
+    humidity: getRandomForSimulation(50, 80),
+    windSpeed: getRandomForSimulation(2, 10),
+    windDirection: Math.floor(getRandomForSimulation(0, 360)),
+    precipitation: getRandomForSimulation(0, 1) > 0.7 ? getRandomForSimulation(0, 5) : 0,
+    uvIndex: Math.floor(getRandomForSimulation(0, 10)),
+    pressure: 1013 + Math.sin(getRandomForSimulation(0, 1)) * 10,
+    weatherDescription: 'Simulado',
+    weatherIcon: '01d',
+    source: 'Simulado',
+    timestamp: new Date()
+  };
+}
+
+function logWeatherError(error) {
+  if (error.response) {
+    console.error('Respuesta de error:', {
+      status: error.response.status,
+      headers: error.response.headers,
+      data: JSON.stringify(error.response.data, null, 2)
+    });
+  } else if (error.request) {
+    console.error('No se recibió respuesta:', error.request);
+  } else {
+    console.error('Error de configuración:', error.message);
+  }
+  console.error('Stack:', error.stack);
+}
+
+// Obtener datos meteorológicos actuales
+async function getCurrentWeather() {
+  try {
+    console.log('Obteniendo datos meteorológicos actuales...');
+    console.log(`URL: ${WEATHER_API_URL}/weather, API Key: ${WEATHER_API_KEY ? WEATHER_API_KEY.substring(0, 4) + '...' : 'no definida'}`);
+    console.log(`Coordenadas: ${DEFAULT_LAT}, ${DEFAULT_LON}`);
+    
+    // Obtener datos generales del clima
+    const response = await fetchWeatherData();
+    const data = response.data;
+    
+    // Obtener datos de precipitación
+    const rainData = await fetchRainData();
+    
+    // Procesar los datos
+    const processedData = processWeatherData(data, rainData);
     
     // Guardar en la base de datos
     try {
@@ -152,38 +201,12 @@ async function getCurrentWeather() {
     };
   } catch (error) {
     console.error('Error en getCurrentWeather:');
-    // Mostrar información detallada del error
-    if (error.response) {
-      console.error('Respuesta de error:', {
-        status: error.response.status,
-        headers: error.response.headers,
-        data: JSON.stringify(error.response.data, null, 2)
-      });
-    } else if (error.request) {
-      console.error('No se recibió respuesta:', error.request);
-    } else {
-      console.error('Error de configuración:', error.message);
-    }
-    console.error('Stack:', error.stack);
+    logWeatherError(error);
     
     // Si estamos en modo desarrollo o prueba, devolver datos simulados
     if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       console.log('Generando datos meteorológicos simulados para desarrollo');
-      
-      const mockData = {
-        city: DEFAULT_CITY,
-        temperature: 20 + Math.random() * 10,
-        humidity: 50 + Math.random() * 30,
-        windSpeed: 2 + Math.random() * 8,
-        windDirection: Math.floor(Math.random() * 360),
-        precipitation: Math.random() > 0.7 ? Math.random() * 5 : 0,
-        uvIndex: Math.floor(Math.random() * 10),
-        pressure: 1013 + Math.sin(Math.random()) * 10,
-        weatherDescription: 'Simulado',
-        weatherIcon: '01d',
-        source: 'Simulado',
-        timestamp: new Date()
-      };
+      const mockData = createMockWeatherData();
       
       return {
         data: mockData,
@@ -195,7 +218,6 @@ async function getCurrentWeather() {
     throw error;
   }
 }
-
 
 async function getWeatherForecast(days = 5) {
   try {
@@ -237,19 +259,7 @@ async function getWeatherForecast(days = 5) {
     };
   } catch (error) {
     console.error('Error en getWeatherForecast:');
-    // Mostrar información detallada del error
-    if (error.response) {
-      console.error('Respuesta de error:', {
-        status: error.response.status,
-        headers: error.response.headers,
-        data: JSON.stringify(error.response.data, null, 2)
-      });
-    } else if (error.request) {
-      console.error('No se recibió respuesta:', error.request);
-    } else {
-      console.error('Error de configuración:', error.message);
-    }
-    console.error('Stack:', error.stack);
+    logWeatherError(error);
     
     // Si estamos en desarrollo, generar datos de simulación
     if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
@@ -262,12 +272,12 @@ async function getWeatherForecast(days = 5) {
         
         mockForecast.push({
           date: forecastDate,
-          temperature: 20 + Math.sin(i / 8) * 5 + (Math.random() * 2),
+          temperature: 20 + Math.sin(i / 8) * 5 + getRandomForSimulation(0, 2),
           humidity: 60 + Math.cos(i / 6) * 20,
-          description: ['Despejado', 'Parcialmente nublado', 'Nublado', 'Lluvia ligera'][Math.floor(Math.random() * 4)],
-          icon: ['01d', '02d', '03d', '10d'][Math.floor(Math.random() * 4)],
-          precipitation: Math.random() > 0.7 ? Math.random() * 5 : 0,
-          pop: Math.round(Math.random() * 100)
+          description: ['Despejado', 'Parcialmente nublado', 'Nublado', 'Lluvia ligera'][Math.floor(getRandomForSimulation(0, 4))],
+          icon: ['01d', '02d', '03d', '10d'][Math.floor(getRandomForSimulation(0, 4))],
+          precipitation: getRandomForSimulation(0, 1) > 0.7 ? getRandomForSimulation(0, 5) : 0,
+          pop: Math.round(getRandomForSimulation(0, 100))
         });
       }
       
@@ -319,7 +329,7 @@ async function getRainfallHistory(days = 30) {
       
       simulatedData.push({
         date: date.toISOString().split('T')[0],
-        rainfall: Math.random() > 0.7 ? Math.random() * 12 : Math.random() * 3
+        rainfall: getRandomForSimulation(0, 1) > 0.7 ? getRandomForSimulation(0, 12) : getRandomForSimulation(0, 3)
       });
     }
     
@@ -358,9 +368,9 @@ async function getHistoricalWeatherData(days = 7) {
         city: DEFAULT_CITY,
         temperature: 18 + Math.sin(i / 4) * 6,
         humidity: 60 + Math.cos(i / 3) * 15,
-        wind_speed: 2 + Math.random() * 8,
-        wind_direction: Math.floor(Math.random() * 360),
-        precipitation: Math.random() > 0.7 ? Math.random() * 5 : 0,
+        wind_speed: getRandomForSimulation(2, 10),
+        wind_direction: Math.floor(getRandomForSimulation(0, 360)),
+        precipitation: getRandomForSimulation(0, 1) > 0.7 ? getRandomForSimulation(0, 5) : 0,
         pressure: 1013 + Math.sin(i / 12) * 10,
         timestamp: date,
         source: 'Simulado'
@@ -427,7 +437,6 @@ function evaluateWeatherAlert(weatherData) {
   
   return alerts;
 }
-
 
 module.exports = {
   getCurrentWeather,

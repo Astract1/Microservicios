@@ -1,6 +1,9 @@
 ﻿# Etapa de construcción
 FROM node:18-alpine
 
+# Crear un usuario no privilegiado
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 # Establecer directorio de trabajo
 WORKDIR /app
 
@@ -15,6 +18,12 @@ RUN npm install
 
 # Copiar resto del código
 COPY . .
+
+# Cambiar la propiedad de los archivos al usuario no privilegiado
+RUN chown -R appuser:appgroup /app
+
+# Cambiar al usuario no privilegiado
+USER appuser
 
 # Puerto de exposición
 EXPOSE 3000

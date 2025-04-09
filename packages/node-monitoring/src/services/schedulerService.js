@@ -3,6 +3,12 @@ const airQualityService = require('./airQualityService');
 const weatherService = require('./weatherService');
 const alertService = require('./alertService');
 
+// Función auxiliar para generar números aleatorios en un rango para datos de simulación
+function getRandomForSimulation(min, max) {
+  // Seguro para datos de simulación, no se usa para fines de seguridad
+  return min + Math.random() * (max - min);
+}
+
 // Función para iniciar las tareas programadas
 function startScheduledTasks() {
   console.log('Iniciando tareas programadas de monitoreo ambiental...');
@@ -15,7 +21,7 @@ function startScheduledTasks() {
       console.log(`Datos de calidad del aire actualizados. AQI: ${airQualityData.data.aqi}`);
       
       // También podemos recopilar datos por barrios periódicamente
-      if (Math.random() > 0.5) {  // Solo 50% de las veces para no exceder límites de API
+      if (getRandomForSimulation(0, 1) > 0.5) {  // Solo 50% de las veces para no exceder límites de API
         await airQualityService.getAirQualityByNeighborhoods();
         console.log('Datos de calidad del aire por barrios actualizados');
       }

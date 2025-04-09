@@ -75,7 +75,7 @@ async function checkAndCreateAlerts(airQualityData, weatherData) {
     const alerts = [];
     
     // Verificar calidad del aire
-    if (airQualityData && airQualityData.aqi) {
+    if (airQualityData?.aqi) {
       const airQualityAlert = evaluateAirQualityAlert(airQualityData.aqi);
       if (airQualityAlert.alertLevel !== 'none') {
         alerts.push({
