@@ -2,9 +2,17 @@ const pool = require('../db');
 
 /**
  * Obtiene recomendaciones basadas en condiciones ambientales actuales
+ * @param {Object} params - Parámetros de condiciones ambientales
+ * @param {number|null} params.aqi - Índice de calidad del aire
+ * @param {number|null} params.temperature - Temperatura en grados Celsius
+ * @param {number|null} params.humidity - Porcentaje de humedad
+ * @param {number|null} params.precipitation - Nivel de precipitación en mm
+ * @param {number|null} params.uvIndex - Índice UV
+ * @param {number} params.limit - Número máximo de recomendaciones a devolver
+ * @returns {Promise<Array>} Array de recomendaciones
  */
 async function getRecommendationsByConditions({ 
-  aqi, temperature, humidity, precipitation, uvIndex, limit = 5 
+  aqi = null, temperature = null, humidity = null, precipitation = null, uvIndex = null, limit = 5 
 }) {
   const connection = await pool.getConnection();
   try {
@@ -20,51 +28,62 @@ async function getRecommendationsByConditions({
     `;
     
     const params = [];
+    const conditionsApplied = { count: 0 };
     
     // Filtrar por condiciones ambientales disponibles
-    if (aqi !== null) {
+    if (aqi !== null && typeof aqi === 'number') {
       query += ` AND (
         (ec.condition_type = 'AIR_QUALITY' AND ? BETWEEN ec.condition_min_value AND ec.condition_max_value)
         OR ec.condition_type != 'AIR_QUALITY'
       )`;
       params.push(aqi);
+      conditionsApplied.count++;
     }
     
-    if (temperature !== null) {
+    if (temperature !== null && typeof temperature === 'number') {
       query += ` AND (
         (ec.condition_type = 'TEMPERATURE' AND ? BETWEEN ec.condition_min_value AND ec.condition_max_value)
         OR ec.condition_type != 'TEMPERATURE'
       )`;
       params.push(temperature);
+      conditionsApplied.count++;
     }
     
-    if (humidity !== null) {
+    if (humidity !== null && typeof humidity === 'number') {
       query += ` AND (
         (ec.condition_type = 'HUMIDITY' AND ? BETWEEN ec.condition_min_value AND ec.condition_max_value)
         OR ec.condition_type != 'HUMIDITY'
       )`;
       params.push(humidity);
+      conditionsApplied.count++;
     }
     
-    if (precipitation !== null) {
+    if (precipitation !== null && typeof precipitation === 'number') {
       query += ` AND (
         (ec.condition_type = 'RAINFALL' AND ? BETWEEN ec.condition_min_value AND ec.condition_max_value)
         OR ec.condition_type != 'RAINFALL'
       )`;
       params.push(precipitation);
+      conditionsApplied.count++;
     }
     
-    if (uvIndex !== null) {
+    if (uvIndex !== null && typeof uvIndex === 'number') {
       query += ` AND (
         (ec.condition_type = 'UV_INDEX' AND ? BETWEEN ec.condition_min_value AND ec.condition_max_value)
         OR ec.condition_type != 'UV_INDEX'
       )`;
       params.push(uvIndex);
+      conditionsApplied.count++;
+    }
+    
+    // Si no se aplicó ninguna condición específica, priorizar contenido general
+    if (conditionsApplied.count === 0) {
+      query += ` AND ec.condition_type = 'GENERAL'`;
     }
     
     // Ordenar por prioridad (mayor primero) y luego por fecha de publicación (más reciente primero)
     query += ` ORDER BY ec.priority DESC, c.published_at DESC LIMIT ?`;
-    params.push(parseInt(limit));
+    params.push(parseInt(limit) || 5);
     
     const [rows] = await connection.execute(query, params);
     
@@ -74,7 +93,7 @@ async function getRecommendationsByConditions({
       const generalLimit = limit - rows.length;
       const existingIds = rows.map(row => row.content_id);
       
-      const generalQuery = `
+      let additionalQuery = `
         SELECT c.id AS content_id, c.title, c.summary, c.content_type, 
           c.difficulty_level, c.image_url, c.read_time, c.published_at,
           cat.name AS category_name, 5 AS priority,
@@ -85,7 +104,6 @@ async function getRecommendationsByConditions({
         WHERE ec.condition_type = 'GENERAL'
       `;
       
-      let additionalQuery = generalQuery;
       const additionalParams = [];
       
       if (existingIds.length > 0) {
@@ -97,14 +115,20 @@ async function getRecommendationsByConditions({
       additionalQuery += ` ORDER BY c.is_featured DESC, c.published_at DESC LIMIT ?`;
       additionalParams.push(generalLimit);
       
-      const [additionalRows] = await connection.execute(additionalQuery, additionalParams);
-      rows.push(...additionalRows);
+      try {
+        const [additionalRows] = await connection.execute(additionalQuery, additionalParams);
+        rows.push(...additionalRows);
+      } catch (error) {
+        console.error('Error al obtener recomendaciones adicionales:', error);
+        // Continuar sin recomendaciones adicionales
+      }
     }
     
     return rows;
   } catch (error) {
     console.error('Error en getRecommendationsByConditions:', error);
-    throw error;
+    // En caso de error, devolver un array vacío en lugar de lanzar una excepción
+    return [];
   } finally {
     connection.release();
   }
@@ -112,15 +136,23 @@ async function getRecommendationsByConditions({
 
 /**
  * Obtiene recomendaciones específicas para la calidad del aire
+ * @param {number} aqi - Índice de calidad del aire
+ * @returns {Promise<Object>} Objeto con recomendaciones y datos relacionados
  */
 async function getAirQualityRecommendations(aqi) {
   const connection = await pool.getConnection();
   try {
+    // Verificar que aqi sea un número
+    const aqiValue = parseFloat(aqi);
+    if (isNaN(aqiValue)) {
+      throw new Error('El valor de AQI debe ser un número');
+    }
+    
     // Determinar la categoría de calidad del aire
     let category = 'Buena';
     let recommendations = [];
     
-    if (aqi > 300) {
+    if (aqiValue > 300) {
       category = 'Peligrosa';
       recommendations = [
         'Evite completamente actividades al aire libre',
@@ -129,7 +161,7 @@ async function getAirQualityRecommendations(aqi) {
         'Considere el uso de mascarillas N95 o equivalentes si debe salir',
         'Las personas con condiciones respiratorias deberían contactar a su médico'
       ];
-    } else if (aqi > 200) {
+    } else if (aqiValue > 200) {
       category = 'Muy insalubre';
       recommendations = [
         'Evite actividades prolongadas al aire libre',
@@ -138,7 +170,7 @@ async function getAirQualityRecommendations(aqi) {
         'Use mascarillas apropiadas al salir',
         'Considere trabajar o estudiar desde casa si es posible'
       ];
-    } else if (aqi > 150) {
+    } else if (aqiValue > 150) {
       category = 'Insalubre';
       recommendations = [
         'Personas sensibles deben limitar actividades al aire libre',
@@ -147,7 +179,7 @@ async function getAirQualityRecommendations(aqi) {
         'Considere el uso de mascarillas en exteriores',
         'Tenga a mano medicamentos para condiciones respiratorias'
       ];
-    } else if (aqi > 100) {
+    } else if (aqiValue > 100) {
       category = 'Insalubre para grupos sensibles';
       recommendations = [
         'Personas con asma o problemas respiratorios deben reducir actividades exteriores',
@@ -156,7 +188,7 @@ async function getAirQualityRecommendations(aqi) {
         'Manténgase informado sobre la evolución de la calidad del aire',
         'Tenga precaución si experimenta síntomas respiratorios'
       ];
-    } else if (aqi > 50) {
+    } else if (aqiValue > 50) {
       category = 'Moderada';
       recommendations = [
         'La calidad del aire es aceptable, pero puede haber riesgos moderados para personas muy sensibles',
@@ -177,29 +209,42 @@ async function getAirQualityRecommendations(aqi) {
     }
     
     // Obtener contenido educativo relacionado con la calidad del aire
-    const [contentRows] = await connection.execute(
-      `SELECT 
-        c.id, c.title, c.summary, c.content_type, c.image_url, c.read_time,
-        cat.name AS category_name
-      FROM educational_content c
-      LEFT JOIN education_categories cat ON c.category_id = cat.id
-      JOIN content_tag_relations ctr ON c.id = ctr.content_id
-      JOIN content_tags t ON ctr.tag_id = t.id
-      WHERE t.name IN ('Calidad del aire', 'Contaminación', 'Salud respiratoria')
-      GROUP BY c.id
-      ORDER BY c.is_featured DESC, c.published_at DESC
-      LIMIT 3`
-    );
+    let contentRows = [];
+    try {
+      const [rows] = await connection.execute(
+        `SELECT 
+          c.id, c.title, c.summary, c.content_type, c.image_url, c.read_time,
+          cat.name AS category_name
+        FROM educational_content c
+        LEFT JOIN education_categories cat ON c.category_id = cat.id
+        JOIN content_tag_relations ctr ON c.id = ctr.content_id
+        JOIN content_tags t ON ctr.tag_id = t.id
+        WHERE t.name IN ('Calidad del aire', 'Contaminación', 'Salud respiratoria')
+        GROUP BY c.id
+        ORDER BY c.is_featured DESC, c.published_at DESC
+        LIMIT 3`
+      );
+      contentRows = rows;
+    } catch (error) {
+      console.error('Error al obtener contenido relacionado:', error);
+      // Continuar sin contenido relacionado
+    }
     
     return {
-      aqi_value: aqi,
+      aqi_value: aqiValue,
       category,
       recommendations,
       related_content: contentRows
     };
   } catch (error) {
     console.error('Error en getAirQualityRecommendations:', error);
-    throw error;
+    // Devolver un objeto con valores predeterminados
+    return {
+      aqi_value: aqi || 0,
+      category: 'No disponible',
+      recommendations: ['No se pudieron generar recomendaciones en este momento.'],
+      related_content: []
+    };
   } finally {
     connection.release();
   }
@@ -207,143 +252,194 @@ async function getAirQualityRecommendations(aqi) {
 
 /**
  * Obtiene recomendaciones específicas para condiciones climáticas
+ * @param {Object} params - Parámetros climáticos
+ * @param {number|null} params.temperature - Temperatura en grados Celsius
+ * @param {number|null} params.humidity - Porcentaje de humedad
+ * @param {number|null} params.precipitation - Nivel de precipitación en mm
+ * @returns {Promise<Array>} Array de recomendaciones
  */
-async function getWeatherRecommendations({ temperature, humidity, precipitation }) {
-  const recommendations = [];
-  
-  // Recomendaciones basadas en temperatura
-  if (temperature !== null) {
-    if (temperature > 35) {
-      recommendations.push({
-        type: 'temperature',
-        severity: 'high',
-        title: 'Alerta por calor extremo',
-        recommendations: [
-          'Evite actividades al aire libre durante las horas más calurosas (11am - 4pm)',
-          'Beba abundante agua aunque no sienta sed',
-          'Use ropa ligera, holgada y de colores claros',
-          'Busque lugares con aire acondicionado',
-          'Verifique el estado de personas mayores, niños y mascotas regularmente'
-        ]
-      });
-    } else if (temperature > 30) {
-      recommendations.push({
-        type: 'temperature',
-        severity: 'medium',
-        title: 'Precaución por calor',
-        recommendations: [
-          'Beba abundante agua durante el día',
-          'Utilice protector solar y sombrero al salir',
-          'Limite la actividad física intensa en exteriores',
-          'Busque sombra frecuentemente',
-          'Mantenga la ventilación adecuada en espacios cerrados'
-        ]
-      });
-    } else if (temperature < 5) {
-      recommendations.push({
-        type: 'temperature',
-        severity: 'high',
-        title: 'Alerta por frío extremo',
-        recommendations: [
-          'Abríguese con varias capas de ropa',
-          'Proteja especialmente extremidades, cabeza y rostro',
-          'Evite la exposición prolongada al frío',
-          'Mantenga una fuente segura de calefacción en interiores',
-          'Revise el estado de personas vulnerables en su comunidad'
-        ]
-      });
-    } else if (temperature < 10) {
-      recommendations.push({
-        type: 'temperature',
-        severity: 'medium',
-        title: 'Precaución por frío',
-        recommendations: [
-          'Use ropa de abrigo apropiada',
-          'Considere utilizar guantes y bufanda',
-          'Evite cambios bruscos de temperatura',
-          'Mantenga una adecuada ventilación en espacios con calefacción',
-          'Hidratación adecuada aunque no sienta sed'
-        ]
-      });
-    }
-  }
-  
-  // Recomendaciones basadas en humedad
-  if (humidity !== null) {
-    if (humidity > 80) {
-      recommendations.push({
-        type: 'humidity',
-        severity: 'medium',
-        title: 'Humedad alta',
-        recommendations: [
-          'Use ropa transpirable y ligera',
-          'Mantenga una hidratación adecuada',
-          'Utilice ventiladores o aire acondicionado para mejorar la circulación del aire',
-          'Esté atento a signos de fatiga por calor, que se agrava con alta humedad',
-          'Limite la actividad física intensa, especialmente en exterior'
-        ]
-      });
-    } else if (humidity < 30) {
-      recommendations.push({
-        type: 'humidity',
+async function getWeatherRecommendations({ temperature = null, humidity = null, precipitation = null }) {
+  try {
+    // Validar que al menos un parámetro sea un número válido
+    const tempValue = temperature !== null ? parseFloat(temperature) : null;
+    const humidityValue = humidity !== null ? parseFloat(humidity) : null;
+    const precipValue = precipitation !== null ? parseFloat(precipitation) : null;
+    
+    if ((tempValue === null || isNaN(tempValue)) && 
+        (humidityValue === null || isNaN(humidityValue)) && 
+        (precipValue === null || isNaN(precipValue))) {
+      return [{
+        type: 'general',
         severity: 'low',
-        title: 'Humedad baja',
+        title: 'Información insuficiente',
         recommendations: [
-          'Hidrate su piel con cremas o lociones humectantes',
-          'Beba suficiente agua durante el día',
-          'Considere utilizar un humidificador en interiores',
-          'Preste atención a síntomas de sequedad en ojos y vías respiratorias',
-          'Ventile adecuadamente los espacios cerrados'
+          'No se proporcionaron datos climáticos suficientes para generar recomendaciones específicas.'
         ]
-      });
+      }];
     }
-  }
-  
-  // Recomendaciones basadas en precipitación
-  if (precipitation !== null) {
-    if (precipitation > 15) {
+    
+    const recommendations = [];
+    
+    // Recomendaciones basadas en temperatura
+    if (tempValue !== null && !isNaN(tempValue)) {
+      if (tempValue > 35) {
+        recommendations.push({
+          type: 'temperature',
+          severity: 'high',
+          title: 'Alerta por calor extremo',
+          recommendations: [
+            'Evite actividades al aire libre durante las horas más calurosas (11am - 4pm)',
+            'Beba abundante agua aunque no sienta sed',
+            'Use ropa ligera, holgada y de colores claros',
+            'Busque lugares con aire acondicionado',
+            'Verifique el estado de personas mayores, niños y mascotas regularmente'
+          ]
+        });
+      } else if (tempValue > 30) {
+        recommendations.push({
+          type: 'temperature',
+          severity: 'medium',
+          title: 'Precaución por calor',
+          recommendations: [
+            'Beba abundante agua durante el día',
+            'Utilice protector solar y sombrero al salir',
+            'Limite la actividad física intensa en exteriores',
+            'Busque sombra frecuentemente',
+            'Mantenga la ventilación adecuada en espacios cerrados'
+          ]
+        });
+      } else if (tempValue < 5) {
+        recommendations.push({
+          type: 'temperature',
+          severity: 'high',
+          title: 'Alerta por frío extremo',
+          recommendations: [
+            'Abríguese con varias capas de ropa',
+            'Proteja especialmente extremidades, cabeza y rostro',
+            'Evite la exposición prolongada al frío',
+            'Mantenga una fuente segura de calefacción en interiores',
+            'Revise el estado de personas vulnerables en su comunidad'
+          ]
+        });
+      } else if (tempValue < 10) {
+        recommendations.push({
+          type: 'temperature',
+          severity: 'medium',
+          title: 'Precaución por frío',
+          recommendations: [
+            'Use ropa de abrigo apropiada',
+            'Considere utilizar guantes y bufanda',
+            'Evite cambios bruscos de temperatura',
+            'Mantenga una adecuada ventilación en espacios con calefacción',
+            'Hidratación adecuada aunque no sienta sed'
+          ]
+        });
+      }
+    }
+    
+    // Recomendaciones basadas en humedad
+    if (humidityValue !== null && !isNaN(humidityValue)) {
+      if (humidityValue > 80) {
+        recommendations.push({
+          type: 'humidity',
+          severity: 'medium',
+          title: 'Humedad alta',
+          recommendations: [
+            'Use ropa transpirable y ligera',
+            'Mantenga una hidratación adecuada',
+            'Utilice ventiladores o aire acondicionado para mejorar la circulación del aire',
+            'Esté atento a signos de fatiga por calor, que se agrava con alta humedad',
+            'Limite la actividad física intensa, especialmente en exterior'
+          ]
+        });
+      } else if (humidityValue < 30) {
+        recommendations.push({
+          type: 'humidity',
+          severity: 'low',
+          title: 'Humedad baja',
+          recommendations: [
+            'Hidrate su piel con cremas o lociones humectantes',
+            'Beba suficiente agua durante el día',
+            'Considere utilizar un humidificador en interiores',
+            'Preste atención a síntomas de sequedad en ojos y vías respiratorias',
+            'Ventile adecuadamente los espacios cerrados'
+          ]
+        });
+      }
+    }
+    
+    // Recomendaciones basadas en precipitación
+    if (precipValue !== null && !isNaN(precipValue)) {
+      if (precipValue > 15) {
+        recommendations.push({
+          type: 'precipitation',
+          severity: 'high',
+          title: 'Lluvias intensas',
+          recommendations: [
+            'Evite transitar por zonas propensas a inundaciones',
+            'Extreme precauciones al conducir',
+            'Tenga preparado un kit de emergencia',
+            'Manténgase informado sobre alertas meteorológicas',
+            'Si es posible, permanezca en un lugar seguro hasta que mejoren las condiciones'
+          ]
+        });
+      } else if (precipValue > 5) {
+        recommendations.push({
+          type: 'precipitation',
+          severity: 'medium',
+          title: 'Lluvia moderada',
+          recommendations: [
+            'Lleve paraguas o impermeable',
+            'Conduzca con precaución, reduciendo la velocidad',
+            'Utilice calzado apropiado para evitar resbalones',
+            'Esté atento a posibles encharcamientos',
+            'Revise el estado de desagües y drenajes en su hogar'
+          ]
+        });
+      } else if (precipValue > 0) {
+        recommendations.push({
+          type: 'precipitation',
+          severity: 'low',
+          title: 'Lluvia ligera',
+          recommendations: [
+            'Considere llevar un paraguas o impermeable ligero',
+            'La visibilidad puede reducirse ligeramente al conducir',
+            'Las calles pueden estar resbaladizas',
+            'Es seguro realizar la mayoría de actividades normales',
+            'Buen momento para revisar el funcionamiento de limpiaparabrisas'
+          ]
+        });
+      }
+    }
+    
+    // Si no hay recomendaciones específicas, añadir una general
+    if (recommendations.length === 0) {
       recommendations.push({
-        type: 'precipitation',
-        severity: 'high',
-        title: 'Lluvias intensas',
-        recommendations: [
-          'Evite transitar por zonas propensas a inundaciones',
-          'Extreme precauciones al conducir',
-          'Tenga preparado un kit de emergencia',
-          'Manténgase informado sobre alertas meteorológicas',
-          'Si es posible, permanezca en un lugar seguro hasta que mejoren las condiciones'
-        ]
-      });
-    } else if (precipitation > 5) {
-      recommendations.push({
-        type: 'precipitation',
-        severity: 'medium',
-        title: 'Lluvia moderada',
-        recommendations: [
-          'Lleve paraguas o impermeable',
-          'Conduzca con precaución, reduciendo la velocidad',
-          'Utilice calzado apropiado para evitar resbalones',
-          'Esté atento a posibles encharcamientos',
-          'Revise el estado de desagües y drenajes en su hogar'
-        ]
-      });
-    } else if (precipitation > 0) {
-      recommendations.push({
-        type: 'precipitation',
+        type: 'general',
         severity: 'low',
-        title: 'Lluvia ligera',
+        title: 'Condiciones favorables',
         recommendations: [
-          'Considere llevar un paraguas o impermeable ligero',
-          'La visibilidad puede reducirse ligeramente al conducir',
-          'Las calles pueden estar resbaladizas',
-          'Es seguro realizar la mayoría de actividades normales',
-          'Buen momento para revisar el funcionamiento de limpiaparabrisas'
+          'Las condiciones climáticas son favorables para la mayoría de actividades.',
+          'Disfrute del día y manténgase hidratado.',
+          'Es un buen momento para actividades al aire libre.'
         ]
       });
     }
+    
+    return recommendations;
+  } catch (error) {
+    console.error('Error en getWeatherRecommendations:', error);
+    // Devolver una recomendación genérica en caso de error
+    return [{
+      type: 'error',
+      severity: 'low',
+      title: 'Error al procesar recomendaciones',
+      recommendations: [
+        'No se pudieron generar recomendaciones específicas en este momento.',
+        'Por favor, revise las condiciones meteorológicas actuales por otras fuentes.'
+      ]
+    }];
   }
-  
-  return recommendations;
 }
 
 module.exports = {
