@@ -1,0 +1,6 @@
+services:
+  dotnet-prevention:
+    environment:
+      - DATABASE_CONNECTION=Data Source=PreventionService.db
+    volumes:
+      - ./packages/dotnet-prevention/PreventionService.db:PreventionService.db
