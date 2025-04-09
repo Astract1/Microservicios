@@ -13,11 +13,15 @@ services:
       - mariadb_data:/var/lib/mysql
       - ./packages/node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/init-monitoring.sql
       - ./packages/node-education/database-schema.sql:/docker-entrypoint-initdb.d/init-education.sql
-    ports:
-      - "3306:3306"
+    # Puerto removido para mayor seguridad - solo accesible desde la red interna
     command: --bind-address=0.0.0.0
     networks:
       - monitoreo-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Servicio Backend de Monitoreo Ambiental
   monitoreo-ambiental-api:
@@ -34,12 +38,19 @@ services:
       - DB_DATABASE=monitoreo_ambiental
       - IQAIR_API_KEY=${IQAIR_API_KEY}
       - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - PORT=3000
     ports:
       - "3000:3000"
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     networks:
       - monitoreo-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/diagnostics"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
 
   # Servicio de Evaluación de Riesgos (dotnet-risk)
   dotnet-risk:
@@ -50,29 +61,46 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DATABASE_CONNECTION=Data Source=/data/RiskService.db
+      - DATABASE_CONNECTION=Data Source=/app/Data/RiskService.db
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
     volumes:
-      - ./packages/dotnet-risk/RiskService.db:/data/RiskService.db
-
+      - risk_data:/app/Data
     ports:
-      - "5002:80" # Mapeo del puerto del contenedor al host
+      - "5002:80"
     networks:
       - monitoreo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Servicio de Prevención
   dotnet-prevention:
     build:
       context: ./packages/dotnet-prevention
       dockerfile: Dockerfile
+    container_name: dotnet-prevention
+    restart: unless-stopped
     ports:
       - "5001:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - DATABASE_CONNECTION=${DATABASE_CONNECTION}
-      - DOTNET_RISK_API_URL=${DOTNET_RISK_API_URL}
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DATABASE_CONNECTION=Data Source=/app/Data/PreventionService.db
+      - DOTNET_RISK_API_URL=http://dotnet-risk
+    volumes:
+      - prevention_data:/app/Data
     depends_on:
-      - dotnet-risk # Si este microservicio depende de otro llamado dotnet-risk
+      dotnet-risk:
+        condition: service_healthy
     networks:
       - monitoreo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Servicio de Educación Ambiental
   educacion-ambiental-api:
     build:
@@ -91,10 +119,17 @@ services:
     ports:
       - "3002:3002"
     depends_on:
-      - mariadb
-      - monitoreo-ambiental-api
+      mariadb:
+        condition: service_healthy
+      monitoreo-ambiental-api:
+        condition: service_healthy
     networks:
       - monitoreo-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
 
   # Interfaz de Usuario de Monitoreo
   ui-monitoring:
@@ -106,33 +141,25 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - monitoreo-ambiental-api
-      - educacion-ambiental-api
+      monitoreo-ambiental-api:
+        condition: service_healthy
+      educacion-ambiental-api:
+        condition: service_healthy
+      dotnet-risk:
+        condition: service_healthy
+      dotnet-prevention:
+        condition: service_healthy
     networks:
       - monitoreo-network
     environment:
       - REACT_APP_API_URL=/api
       - REACT_APP_EDUCATION_API_URL=/education-api
+      - REACT_APP_RISK_API_URL=/risk-api
+      - REACT_APP_PREVENTION_API_URL=/prevention-api
 
-  # Servicio de Visualización de Datos (Grafana)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: monitoreo-ambiental-grafana
-    restart: unless-stopped
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    ports:
-      - "3001:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - mariadb
-    networks:
-      - monitoreo-network
 
-  # Herramienta de Administración de Base de Datos
+
+  # Herramienta de Administración de Base de Datos (solo en desarrollo)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: monitoreo-ambiental-phpmyadmin
@@ -140,16 +167,24 @@ services:
     environment:
       PMA_HOST: mariadb
       PMA_USER: root
-      PMA_PASSWORD: admin
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
     ports:
       - "8080:80"
+    depends_on:
+      mariadb:
+        condition: service_healthy
     networks:
       - monitoreo-network
+    # Esta sección hace que phpmyadmin solo se inicie en entorno de desarrollo
+    profiles:
+      - dev
 
 # Volúmenes persistentes
 volumes:
   mariadb_data:
   grafana_data:
+  risk_data:
+  prevention_data:
 
 # Red personalizada para comunicación entre servicios
 networks:

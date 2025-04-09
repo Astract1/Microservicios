@@ -17,7 +17,10 @@ namespace PreventionService.Services
 
         public async Task<RiskEvaluationResult> GetRiskEvaluationAsync(int userId)
         {
-            var response = await _httpClient.GetAsync($"/api/risk/results/{userId}");
+           
+            var userData = new { userId = userId };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/risk/evaluate", userData);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();

@@ -42,6 +42,8 @@ namespace RiskService.Controllers
             // Guardar el resultado en la base de datos
             var riskResult = new RiskResult
             {
+                Name = "Evaluación de Riesgo " + DateTime.UtcNow.ToString("yyyy-MM-dd"),
+                Description = "Evaluación automática basada en condiciones ambientales y datos del usuario",
                 RiskLevel = result.RiskLevel,
                 Recommendations = string.Join(", ", result.Recommendations),
                 CreatedAt = DateTime.UtcNow

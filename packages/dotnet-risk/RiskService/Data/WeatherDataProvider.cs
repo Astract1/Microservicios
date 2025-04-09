@@ -6,8 +6,11 @@ namespace RiskService.Data
 {
     public class WeatherDataProvider
     {
-        private readonly string _apiKey = "TU_API_KEY";
+        // Declara e inicializa la URL base de la API
         private readonly string _baseUrl = "https://api.openweathermap.org/data/2.5/weather";
+        
+        private readonly string _apiKey = Environment.GetEnvironmentVariable("WEATHER_API_KEY") ??
+            throw new InvalidOperationException("Weather API key no configurada. Establece la variable de entorno WEATHER_API_KEY.");
 
         public async Task<EnvironmentalData> GetWeatherDataAsync(string location)
         {
@@ -23,7 +26,7 @@ namespace RiskService.Data
             {
                 Temperature = data.main.temp,
                 Humidity = data.main.humidity,
-                AirQualityIndex = data.main.aqi // Ejemplo, depende de la API
+                AirQualityIndex = data.main.aqi 
             };
         }
     }
