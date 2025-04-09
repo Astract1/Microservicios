@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using PreventionService.Models;
 
 namespace PreventionService.Data
 {
@@ -7,11 +6,14 @@ namespace PreventionService.Data
     {
         public PreventionDbContext(DbContextOptions<PreventionDbContext> options) : base(options) { }
 
-        public DbSet<Recommendation> Recommendations { get; set; }
+        // Define tus entidades aquí
+        public DbSet<Prevention> Preventions { get; set; }
+    }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Recommendation>().ToTable("Recommendations");
-        }
+    public class Prevention
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

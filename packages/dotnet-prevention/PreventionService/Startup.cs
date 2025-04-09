@@ -29,7 +29,7 @@ namespace PreventionService
 
             // Configurar base de datos
             services.AddDbContext<PreventionDbContext>(options =>
-                options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
