@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PreventionService")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bd9b9332362f2abeede3acdeba963c66abe579bf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7e1e5a185eb97c0345087ccbaf0d9b5687dab143")]
 [assembly: System.Reflection.AssemblyProductAttribute("PreventionService")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PreventionService")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
