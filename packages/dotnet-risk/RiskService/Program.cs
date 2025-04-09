@@ -11,15 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<RiskEvaluationService>();
 builder.Services.AddScoped<WeatherDataProvider>();
 
-// Configurar DbContext con MariaDB
+// Configurar DbContext con SQLite
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 builder.Services.AddDbContext<RiskDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-        mySqlOptions => mySqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)) // Reintentos en caso de fallo
-    .EnableSensitiveDataLogging() // Mostrar datos sensibles en los logs (solo para desarrollo)
-    .LogTo(Console.WriteLine, LogLevel.Information)); // Registrar consultas SQL en la consola
+    options.UseSqlite(connectionString)); // Cambiar a SQLite
 
 var app = builder.Build();
 

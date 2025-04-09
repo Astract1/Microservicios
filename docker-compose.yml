@@ -49,14 +49,30 @@ services:
     container_name: dotnet-risk
     restart: unless-stopped
     environment:
-      - DATABASE_CONNECTION=Server=mariadb;Database=monitoreo_ambiental;User=root;Password=admin;
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DATABASE_CONNECTION=Data Source=/data/RiskService.db
+    volumes:
+      - ./packages/dotnet-risk/RiskService.db:/data/RiskService.db
+
     ports:
-      - "5128:80" # Mapeo del puerto del contenedor al host
-    depends_on:
-      - mariadb
+      - "5002:80" # Mapeo del puerto del contenedor al host
     networks:
       - monitoreo-network
 
+  dotnet-prevention:
+    build:
+      context: ./packages/dotnet-prevention
+      dockerfile: Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - DATABASE_CONNECTION=${DATABASE_CONNECTION}
+      - DOTNET_RISK_API_URL=${DOTNET_RISK_API_URL}
+    depends_on:
+      - dotnet-risk # Si este microservicio depende de otro llamado dotnet-risk
+    networks:
+      - monitoreo-network
   # Servicio de Educación Ambiental
   educacion-ambiental-api:
     build:
