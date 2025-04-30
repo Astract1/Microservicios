@@ -1,3 +1,9 @@
+// Importar rutas
+const airQualityRoutes = require('./routes/airQuality');
+const weatherRoutes = require('./routes/weather');
+const alertsRoutes = require('./routes/alerts');
+const healthRoutes = require('./routes/health');
+
 function App() {
   return (
     <div className="container">

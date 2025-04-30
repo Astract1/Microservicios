@@ -1,58 +1,114 @@
-# Configuración de Docker Compose para Microservicios de Monitoreo Ambiental
+version: '3.8'
+
+# Red compartida para todos los servicios
+networks:
+  microservicios-net:
+    driver: bridge
+
+# Volúmenes persistentes
+volumes:
+  mariadb_data:
+    driver: local
+  risk_data:
+    driver: local
+  prevention_data:
+    driver: local
 
 services:
-  # Servicio de Base de Datos MariaDB
+  #=======================================================
+  # SERVICIO DE BASE DE DATOS
+  #=======================================================
   mariadb:
     image: mariadb:10.6
-    container_name: monitoreo-ambiental-db
+    container_name: mariadb
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
       MYSQL_DATABASE: monitoreo_ambiental
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-db_password}
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./packages/node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/init-monitoring.sql
-      - ./packages/node-education/database-schema.sql:/docker-entrypoint-initdb.d/init-education.sql
-    # Puerto removido para mayor seguridad - solo accesible desde la red interna
-    command: --bind-address=0.0.0.0
+      - ./packages/node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/01-init-monitoring.sql
+      - ./packages/node-education/database-schema.sql:/docker-entrypoint-initdb.d/02-init-education.sql
+    ports:
+      - "3306:3306"
+    command: --bind-address=0.0.0.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     networks:
-      - monitoreo-network
+      - microservicios-net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-admin}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
-  # Servicio Backend de Monitoreo Ambiental
-  monitoreo-ambiental-api:
+  #=======================================================
+  # SERVICIOS BACKEND
+  #=======================================================
+  
+  # Servicio de monitoreo ambiental
+  node-monitoring:
     build:
       context: ./packages/node-monitoring
       dockerfile: Dockerfile
-    container_name: monitoreo-ambiental-api
+    container_name: node-monitoring
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - PORT=3001
       - DB_HOST=mariadb
       - DB_USER=root
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
-      - IQAIR_API_KEY=${IQAIR_API_KEY}
-      - WEATHER_API_KEY=${WEATHER_API_KEY}
-      - PORT=3000
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-sample_key}
+      - AIR_QUALITY_API_KEY=${IQAIR_API_KEY:-sample_key}
     ports:
-      - "3000:3000"
+      - "3001:3001"
+    networks:
+      - microservicios-net
     depends_on:
       mariadb:
         condition: service_healthy
-    networks:
-      - monitoreo-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/diagnostics"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (res) => { if (res.statusCode === 200) { process.exit(0); } else { process.exit(1); } }).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
-  # Servicio de Evaluación de Riesgos (dotnet-risk)
+  # Servicio de educación ambiental
+  node-education:
+    build:
+      context: ./packages/node-education
+      dockerfile: Dockerfile
+    container_name: node-education
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DB_HOST=mariadb
+      - DB_USER=root
+      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
+      - DB_DATABASE=monitoreo_ambiental
+      - MONITORING_API_URL=http://node-monitoring:3001/api
+    ports:
+      - "3002:3002"
+    networks:
+      - microservicios-net
+    depends_on:
+      node-monitoring:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Servicio de evaluación de riesgos
   dotnet-risk:
     build:
       context: ./packages/dotnet-risk
@@ -62,20 +118,26 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - DATABASE_CONNECTION=Data Source=/app/Data/RiskService.db
-      - WEATHER_API_KEY=${WEATHER_API_KEY}
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-sample_key}
+      - ASPNETCORE_URLS=http://+:80
+      - MONITORING_API_URL=http://node-monitoring:3001/api
     volumes:
       - risk_data:/app/Data
     ports:
       - "5002:80"
     networks:
-      - monitoreo-network
+      - microservicios-net
+    depends_on:
+      node-monitoring:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
-  # Servicio de Prevención
+  # Servicio de prevención
   dotnet-prevention:
     build:
       context: ./packages/dotnet-prevention
@@ -88,81 +150,179 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DATABASE_CONNECTION=Data Source=/app/Data/PreventionService.db
       - DOTNET_RISK_API_URL=http://dotnet-risk
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-sample_key}
+      - ASPNETCORE_URLS=http://+:80
+      - MONITORING_API_URL=http://node-monitoring:3001/api
     volumes:
       - prevention_data:/app/Data
+    networks:
+      - microservicios-net
     depends_on:
       dotnet-risk:
         condition: service_healthy
-    networks:
-      - monitoreo-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
-  # Servicio de Educación Ambiental
-  educacion-ambiental-api:
-    build:
-      context: ./packages/node-education
-      dockerfile: Dockerfile
-    container_name: educacion-ambiental-api
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - PORT=3002
-      - DB_HOST=mariadb
-      - DB_USER=root
-      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
-      - DB_DATABASE=monitoreo_ambiental
-      - MONITORING_API_URL=http://monitoreo-ambiental-api:3000/api
-    ports:
-      - "3002:3002"
-    depends_on:
-      mariadb:
-        condition: service_healthy
-      monitoreo-ambiental-api:
-        condition: service_healthy
-    networks:
-      - monitoreo-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
-
-  # Interfaz de Usuario de Monitoreo
+  #=======================================================
+  # INTERFACES DE USUARIO
+  #=======================================================
+  
+  # UI de monitoreo ambiental
   ui-monitoring:
     build:
       context: ./packages/ui-monitoring
       dockerfile: Dockerfile
-    container_name: monitoreo-ambiental-ui
+      args:
+        - REACT_APP_NODE_MONITORING_URL=http://node-monitoring:3001
+        - REACT_APP_API_URL=/api
+        - REACT_APP_WEATHER_API_URL=/api/weather
+        - REACT_APP_EDUCATION_API_URL=/education-api
+        - REACT_APP_RISK_API_URL=/risk-api
+        - REACT_APP_PREVENTION_API_URL=/prevention-api
+        - REACT_APP_MAP_PROVIDER=openstreetmap
+    container_name: ui-monitoring
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    networks:
+      - microservicios-net
+    depends_on:
+      node-monitoring:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # UI de educación ambiental
+  ui-education:
+    build:
+      context: ./packages/ui-education
+      dockerfile: Dockerfile
+    container_name: ui-education
+    restart: unless-stopped
+    ports:
+      - "8002:80"
+    networks:
+      - microservicios-net
+    depends_on:
+      node-education:
+        condition: service_healthy
+    environment:
+      - REACT_APP_API_URL=/api
+      - REACT_APP_EDUCATION_API_URL=/education-api
+      - REACT_APP_MONITORING_API_URL=/api
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # UI de evaluación de riesgos
+  ui-risk:
+    build:
+      context: ./packages/ui-risk
+      dockerfile: Dockerfile
+    container_name: ui-risk
+    restart: unless-stopped
+    ports:
+      - "8003:80"
+    networks:
+      - microservicios-net
+    depends_on:
+      dotnet-risk:
+        condition: service_healthy
+    environment:
+      - REACT_APP_API_URL=/api
+      - REACT_APP_RISK_API_URL=/risk-api
+      - REACT_APP_MONITORING_API_URL=/api
+      - REACT_APP_MAP_PROVIDER=openstreetmap
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # UI de prevención
+  ui-prevention:
+    build:
+      context: ./packages/ui-prevention
+      dockerfile: Dockerfile
+    container_name: ui-prevention
+    restart: unless-stopped
+    ports:
+      - "8004:80"
+    networks:
+      - microservicios-net
+    depends_on:
+      dotnet-prevention:
+        condition: service_healthy
+    environment:
+      - REACT_APP_API_URL=/api
+      - REACT_APP_PREVENTION_API_URL=/prevention-api
+      - REACT_APP_MONITORING_API_URL=/api
+      - REACT_APP_RISK_API_URL=/risk-api
+      - REACT_APP_MAP_PROVIDER=openstreetmap
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  #=======================================================
+  # API GATEWAY Y HERRAMIENTAS
+  #=======================================================
+  
+  # API Gateway con Nginx
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
     restart: unless-stopped
     ports:
       - "80:80"
+    volumes:
+      - ./nginx/gateway.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - microservicios-net
     depends_on:
-      monitoreo-ambiental-api:
+      node-monitoring:
         condition: service_healthy
-      educacion-ambiental-api:
+      node-education:
         condition: service_healthy
       dotnet-risk:
         condition: service_healthy
       dotnet-prevention:
         condition: service_healthy
-    networks:
-      - monitoreo-network
-    environment:
-      - REACT_APP_API_URL=/api
-      - REACT_APP_EDUCATION_API_URL=/education-api
-      - REACT_APP_RISK_API_URL=/risk-api
-      - REACT_APP_PREVENTION_API_URL=/prevention-api
+      ui-monitoring:
+        condition: service_healthy
+      ui-education:
+        condition: service_healthy
+      ui-risk:
+        condition: service_healthy
+      ui-prevention:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
-
-
-  # Herramienta de Administración de Base de Datos (solo en desarrollo)
+  # Herramienta de Administración DB (solo en desarrollo)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: monitoreo-ambiental-phpmyadmin
+    container_name: phpmyadmin
     restart: unless-stopped
     environment:
       PMA_HOST: mariadb
@@ -170,23 +330,12 @@ services:
       PMA_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
     ports:
       - "8080:80"
+    networks:
+      - microservicios-net
     depends_on:
       mariadb:
         condition: service_healthy
-    networks:
-      - monitoreo-network
-    # Esta sección hace que phpmyadmin solo se inicie en entorno de desarrollo
+    # Perfiles disponibles: dev (desarrollo) y full (todos los servicios)
     profiles:
       - dev
-
-# Volúmenes persistentes
-volumes:
-  mariadb_data:
-  grafana_data:
-  risk_data:
-  prevention_data:
-
-# Red personalizada para comunicación entre servicios
-networks:
-  monitoreo-network:
-    driver: bridge
+      - full

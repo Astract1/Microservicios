@@ -10,6 +10,9 @@ const weatherService = require('./services/weatherService');
 const alertService = require('./services/alertService');
 const schedulerService = require('./services/schedulerService');
 
+// Importar rutas
+const healthRoutes = require('./routes/health');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -27,6 +30,9 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Registrar rutas
+app.use('/api/health', healthRoutes);
 
 // Endpoint para verificar el estado de las APIs
 app.get('/api/diagnostics', async (req, res) => {
@@ -464,17 +470,23 @@ function generateRecommendations(airQuality, weather, alerts) {
 
 // === INICIAR SERVIDOR Y TAREAS PROGRAMADAS ===
 
-app.listen(port, () => {  
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-  console.log('API de calidad del aire: IQAir');
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
+  console.log(`API de calidad del aire: ${process.env.IQAIR_BASE_URL ? 'IQAir' : 'Otra fuente'}`);
   console.log('Variables de entorno cargadas:');
-  console.log('- IQAIR_BASE_URL:', process.env.IQAIR_BASE_URL);
-  console.log('- WEATHER_API_URL:', process.env.WEATHER_API_URL);
-  console.log('- NODE_ENV:', process.env.NODE_ENV);
+  console.log(`- IQAIR_BASE_URL: ${process.env.IQAIR_BASE_URL}`);
+  console.log(`- WEATHER_API_URL: ${process.env.WEATHER_API_URL}`);
+  console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
   console.log('Inicializando tareas programadas...');
   
-  // Iniciar tareas programadas
-  schedulerService.startScheduledTasks();
+  // Iniciar tareas programadas de monitoreo
+  try {
+    console.log('Iniciando tareas programadas de monitoreo ambiental...');
+    schedulerService.startScheduledTasks();
+    console.log('Tareas programadas iniciadas correctamente');
+  } catch (error) {
+    console.error('Error al iniciar tareas programadas:', error);
+  }
 });
 
 // Manejar señales de cierre para una terminación limpia

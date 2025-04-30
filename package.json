@@ -1,7 +1,15 @@
 {
     "private": true,
     "workspaces": [
-      "packages/*"
-    ]
-  }
-  
+        "packages/*"
+    ],
+    "dependencies": {
+        "@fortawesome/free-solid-svg-icons": "^6.7.2",
+        "@fortawesome/react-fontawesome": "^0.2.2",
+        "http-proxy-middleware": "^3.0.5",
+        "leaflet": "^1.9.4",
+        "leaflet.markercluster": "^1.5.3",
+        "react-leaflet": "^5.0.0",
+        "react-leaflet-markercluster": "^5.0.0-rc.0"
+    }
+}

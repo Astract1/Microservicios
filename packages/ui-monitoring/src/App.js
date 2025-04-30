@@ -1,43 +1,42 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './App.css';
 
-// Componentes de página
-import Dashboard from './components/Dashboard/Dashboard';
-import AirQualityPage from './components/AirQuality/AirQualityPage';
-import WeatherPage from './components/Weather/WeatherPage';
-import RainfallPage from './components/Rainfall/RainfallPage';
-import AlertsPage from './components/Alerts/AlertsPage';
-import MapView from './components/Map/MapView'; // Importamos el nuevo componente
-import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer';
+// Componentes Layout
+import Navbar from './components/layout/Navbar';
+import Sidebar from './components/layout/Sidebar';
+import Footer from './components/layout/Footer';
 
-// Sistema de temas
-import { ThemeProvider } from './styles/theme';
-
-// Estilos
-import './styles/index.css';
+// Páginas
+import Dashboard from './pages/Dashboard';
+import WeatherMonitoring from './pages/WeatherMonitoring';
+import AirQualityMonitoring from './pages/AirQualityMonitoring';
+import EnvironmentalMap from './pages/EnvironmentalMap';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-300">
-          <Navbar />
-          <main className="flex-grow container mx-auto px-4 py-8">
+    <Router>
+      <div className="app">
+        <Navbar />
+        <div className="main-container">
+          <Sidebar />
+          <main className="content">
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/calidad-aire" element={<AirQualityPage />} />
-              <Route path="/clima" element={<WeatherPage />} />
-              <Route path="/precipitaciones" element={<RainfallPage />} />
-              <Route path="/alertas" element={<AlertsPage />} />
-              <Route path="/mapa" element={<MapView />} />
+              <Route path="/weather" element={<WeatherMonitoring />} />
+              <Route path="/air-quality" element={<AirQualityMonitoring />} />
+              <Route path="/environmental-map" element={<EnvironmentalMap />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-          <Footer />
         </div>
-      </Router>
-    </ThemeProvider>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
-export default App;
+export default App; 
