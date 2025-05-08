@@ -7,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Agregar controladores
 builder.Services.AddControllers();
 
+// Agregar health checks
+builder.Services.AddHealthChecks();
+
 // Registrar servicios
 builder.Services.AddScoped<RiskEvaluationService>();
 builder.Services.AddScoped<WeatherDataProvider>();
@@ -37,6 +40,10 @@ using (var scope = app.Services.CreateScope())
 
 // Configurar middleware
 app.UseRouting();
+
+// Map health checks endpoint
+app.MapHealthChecks("/health");
+
 app.MapControllers();
 
 // Ejecutar la app de forma asincrónica

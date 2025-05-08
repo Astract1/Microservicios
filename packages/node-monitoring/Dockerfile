@@ -1,5 +1,8 @@
-﻿# Etapa de construcción
+# Etapa de construcción
 FROM node:18-alpine
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 # Crear un usuario no privilegiado
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

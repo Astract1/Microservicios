@@ -62,7 +62,9 @@ services:
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
       - WEATHER_API_KEY=${WEATHER_API_KEY:-sample_key}
-      - AIR_QUALITY_API_KEY=${IQAIR_API_KEY:-sample_key}
+      - WEATHER_API_URL=${WEATHER_API_URL:-https://api.openweathermap.org/data/2.5}
+      - IQAIR_API_KEY=${IQAIR_API_KEY:-sample_key}
+      - IQAIR_BASE_URL=${IQAIR_BASE_URL:-http://api.airvisual.com/v2}
     ports:
       - "3001:3001"
     networks:
@@ -71,7 +73,7 @@ services:
       mariadb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (res) => { if (res.statusCode === 200) { process.exit(0); } else { process.exit(1); } }).on('error', () => process.exit(1))"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -102,7 +104,7 @@ services:
       mariadb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -131,11 +133,11 @@ services:
       node-monitoring:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 30s
 
   # Servicio de prevención
   dotnet-prevention:
@@ -161,11 +163,11 @@ services:
       dotnet-risk:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 30s
 
   #=======================================================
   # INTERFACES DE USUARIO
@@ -196,7 +198,7 @@ services:
       mariadb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -221,7 +223,7 @@ services:
       - REACT_APP_EDUCATION_API_URL=/education-api
       - REACT_APP_MONITORING_API_URL=/api
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -247,7 +249,7 @@ services:
       - REACT_APP_MONITORING_API_URL=/api
       - REACT_APP_MAP_PROVIDER=openstreetmap
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -274,7 +276,7 @@ services:
       - REACT_APP_RISK_API_URL=/risk-api
       - REACT_APP_MAP_PROVIDER=openstreetmap
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -313,7 +315,7 @@ services:
       ui-prevention:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 5

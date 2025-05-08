@@ -27,6 +27,9 @@ RUN npm run build
 # Etapa de producción
 FROM nginx:1.21-alpine
 
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
 # Copiar archivos de configuración de nginx
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 

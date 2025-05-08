@@ -28,6 +28,16 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'UP',
+    message: 'El servicio de educación ambiental está funcionando correctamente',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
 // === ENDPOINTS DE CONTENIDO EDUCATIVO ===
 
 // Obtener todos los artículos con paginación y filtros
