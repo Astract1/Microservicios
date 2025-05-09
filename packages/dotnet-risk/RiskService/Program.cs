@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Agregar servicios HTTP
+builder.Services.AddHttpClient();
+
 // Agregar controladores
 builder.Services.AddControllers();
 
@@ -19,17 +22,17 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
 
 builder.Services.AddDbContext<RiskDbContext>(options =>
-    options.UseSqlite(connectionString)); // Cambiar a SQLite
+    options.UseSqlite(connectionString));
 
 var app = builder.Build();
 
-// Ejecutar migraciones automáticamente al iniciar la aplicación
+// Ejecutar migraciones automáticamente
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<RiskDbContext>();
     try
     {
-        await dbContext.Database.MigrateAsync(); 
+        dbContext.Database.Migrate();
         Console.WriteLine("Migraciones aplicadas correctamente.");
     }
     catch (Exception ex)
@@ -46,5 +49,4 @@ app.MapHealthChecks("/health");
 
 app.MapControllers();
 
-// Ejecutar la app de forma asincrónica
-await app.RunAsync(); 
+app.Run();

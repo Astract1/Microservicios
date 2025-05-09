@@ -39,7 +39,7 @@ namespace RiskService.Controllers
                 MedicalConditions = request.UserData.MedicalConditions
             };
 
-            var environmentalData = new EnvironmentalData
+            var environmentalData = new RiskService.Models.EnvironmentalData
             {
                 Temperature = request.EnvironmentalData.Temperature.Value,
                 Humidity = request.EnvironmentalData.Humidity.Value,

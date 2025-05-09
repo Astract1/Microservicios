@@ -1,1 +1,65 @@
 /* Estilos mínimos */ 
+
+:root {
+  --nav-height: 60px;
+  --sidebar-width: 250px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  margin-top: var(--nav-height);
+}
+
+.content {
+  flex: 1;
+  padding: var(--spacing-xl);
+  margin-left: var(--sidebar-width);
+  min-height: calc(100vh - var(--nav-height));
+  background-color: var(--background-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    margin-left: 60px;
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    margin-left: 0;
+    padding: var(--spacing-sm);
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 
