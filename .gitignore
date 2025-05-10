@@ -1,2 +1,51 @@
-/node_modules
+# Dependencias
+node_modules/
+**/node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+yarn.lock
+
+# Archivos de entorno
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+
+# Directorios de build
+/dist
+/build
+**/dist
+**/build
+
+# Archivos de caché
+.cache/
+**/.cache/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+.directory
+
+# Archivos de IDE/editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Archivos de testing/coverage
+/coverage
+**/coverage
+
+# Archivos temporales
+/tmp
+**/tmp
+*.log
+
+# Archivos específicos de TypeScript
+*.tsbuildinfo
