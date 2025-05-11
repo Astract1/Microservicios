@@ -1,0 +1,28 @@
+/* LoadingSpinner.css - Estilos para el spinner de carga */
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid rgba(33, 150, 243, 0.2);
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.spinner-inner {
+  width: 35px;
+  height: 35px;
+  background-color: #2196f3;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+} 

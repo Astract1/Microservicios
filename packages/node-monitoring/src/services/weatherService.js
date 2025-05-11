@@ -219,6 +219,31 @@ async function getCurrentWeather() {
   }
 }
 
+// Función para obtener datos del clima - utilizada por el endpoint del dashboard
+async function getWeatherData() {
+  try {
+    const weatherResult = await getCurrentWeather();
+    return weatherResult.data;
+  } catch (error) {
+    console.error('Error al obtener datos meteorológicos:', error);
+    // Devolvemos un objeto con datos mínimos para evitar errores
+    return {
+      city: DEFAULT_CITY,
+      temperature: 0,
+      humidity: 0,
+      windSpeed: 0,
+      windDirection: 0,
+      precipitation: 0,
+      uvIndex: 0,
+      pressure: 0,
+      weatherDescription: 'Error al obtener datos',
+      weatherIcon: '01d',
+      source: 'Error',
+      timestamp: new Date()
+    };
+  }
+}
+
 async function getWeatherForecast(days = 5) {
   try {
     console.log('Obteniendo pronóstico meteorológico...');
@@ -440,6 +465,7 @@ function evaluateWeatherAlert(weatherData) {
 
 module.exports = {
   getCurrentWeather,
+  getWeatherData,
   getWeatherForecast,
   getRainfallHistory,
   getHistoricalWeatherData,

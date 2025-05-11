@@ -108,9 +108,9 @@ async function getAirQualityData() {
     }
     console.error('Stack:', error.stack);
     
-    // Si estamos en modo desarrollo, devolver datos simulados
-    if (process.env.NODE_ENV === 'development' || !API_KEY) {
-      console.log('Generando datos simulados para desarrollo');
+    // Si recibimos un error 429 (Too Many Requests) o estamos en modo desarrollo, devolver datos simulados
+    if (error.response?.status === 429 || process.env.NODE_ENV === 'development' || !API_KEY) {
+      console.log('Generando datos simulados (API agotada o en modo desarrollo)');
       const mockData = {
         city: DEFAULT_CITY,
         aqi: getRandomForSimulation(45, 75),
@@ -152,8 +152,8 @@ async function getAirQualityStations() {
   } catch (error) {
     console.error('Error en getAirQualityStations:', error.response?.data || error.message);
     
-    // Si estamos en modo desarrollo, devolver datos simulados
-    if (process.env.NODE_ENV === 'development' || !API_KEY) {
+    // Si recibimos un error 429 (Too Many Requests) o estamos en modo desarrollo, devolver datos simulados
+    if (error.response?.status === 429 || process.env.NODE_ENV === 'development' || !API_KEY) {
       return {
         data: [
           { name: 'Estación Centro', aqi: 42, distance: 1.2 },
@@ -186,8 +186,8 @@ async function getSupportedCountries() {
   } catch (error) {
     console.error('Error en getSupportedCountries:', error.response?.data || error.message);
     
-    // Si estamos en modo desarrollo, devolver datos simulados
-    if (process.env.NODE_ENV === 'development' || !API_KEY) {
+    // Si recibimos un error 429 (Too Many Requests) o estamos en modo desarrollo, devolver datos simulados
+    if (error.response?.status === 429 || process.env.NODE_ENV === 'development' || !API_KEY) {
       return {
         data: ['Colombia', 'USA', 'Chile', 'Mexico', 'Argentina'],
         simulated: true,
@@ -221,21 +221,37 @@ async function getAirQualityByNeighborhoods() {
     
     if (samplesToTake > 0) {
       for (let i = 0; i < samplesToTake; i++) {
-        const neighborhood = neighborhoods[i];
-        const response = await axios.get(`${BASE_URL}/nearest_city`, {
-          params: {
-            lat: neighborhood.lat,
-            lon: neighborhood.lon,
-            key: API_KEY
+        try {
+          const neighborhood = neighborhoods[i];
+          const response = await axios.get(`${BASE_URL}/nearest_city`, {
+            params: {
+              lat: neighborhood.lat,
+              lon: neighborhood.lon,
+              key: API_KEY
+            }
+          });
+          
+          results.push({
+            name: neighborhood.name,
+            aqi: response.data.data.current.pollution.aqius,
+            temperature: response.data.data.current.weather.tp,
+            humidity: response.data.data.current.weather.hu
+          });
+        } catch (err) {
+          // Si recibimos un error 429, completamos con datos simulados
+          if (err.response?.status === 429) {
+            console.log(`Error 429 (Too Many Requests) al obtener datos para ${neighborhoods[i].name}, usando simulados`);
+            results.push({
+              name: neighborhoods[i].name,
+              aqi: Math.floor(getRandomForSimulation(40, 70)),
+              temperature: Math.floor(getRandomForSimulation(18, 23)),
+              humidity: Math.floor(getRandomForSimulation(60, 80)),
+              simulated: true
+            });
+          } else {
+            throw err; // Re-lanzar otros errores
           }
-        });
-        
-        results.push({
-          name: neighborhood.name,
-          aqi: response.data.data.current.pollution.aqius,
-          temperature: response.data.data.current.weather.tp,
-          humidity: response.data.data.current.weather.hu
-        });
+        }
       }
     }
     
@@ -259,7 +275,15 @@ async function getAirQualityByNeighborhoods() {
   } catch (error) {
     console.error('Error en getAirQualityByNeighborhoods:', error.response?.data || error.message);
     
-    // Si hay error, devolver todo simulado
+    // Si hay error 429 o cualquier otro problema, devolver todo simulado
+    const neighborhoods = [
+      { name: 'Centro', lat: DEFAULT_LAT, lon: DEFAULT_LON },
+      { name: 'Norte', lat: DEFAULT_LAT + 0.05, lon: DEFAULT_LON },
+      { name: 'Sur', lat: DEFAULT_LAT - 0.05, lon: DEFAULT_LON },
+      { name: 'Este', lat: DEFAULT_LAT, lon: DEFAULT_LON + 0.05 },
+      { name: 'Oeste', lat: DEFAULT_LAT, lon: DEFAULT_LON - 0.05 }
+    ];
+    
     return {
       data: neighborhoods.map(n => ({
         name: n.name,
@@ -269,6 +293,7 @@ async function getAirQualityByNeighborhoods() {
         simulated: true
       })),
       fullySimulated: true,
+      error: error.response?.status === 429 ? 'Límite de API excedido' : error.message,
       timestamp: new Date().toISOString()
     };
   }

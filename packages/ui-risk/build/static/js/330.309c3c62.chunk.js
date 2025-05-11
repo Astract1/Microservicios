@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkui_risk=self.webpackChunkui_risk||[]).push([[330],{330:(s,e,n)=>{n.r(e),n.d(e,{default:()=>c});n(176);var i=n(204),a=n(812);const c=()=>(0,a.jsxs)("div",{className:"not-found",children:[(0,a.jsx)("h1",{children:"404"}),(0,a.jsx)("h2",{children:"P\xe1gina no encontrada"}),(0,a.jsx)("p",{children:"Lo sentimos, la p\xe1gina que est\xe1s buscando no existe."}),(0,a.jsx)(i.N_,{to:"/",className:"back-home",children:"Volver al inicio"})]})}}]);
-//# sourceMappingURL=330.309c3c62.chunk.js.map

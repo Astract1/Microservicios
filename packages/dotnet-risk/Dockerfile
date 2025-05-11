@@ -18,7 +18,7 @@ RUN dotnet restore RiskService/RiskService.csproj
 RUN dotnet publish RiskService/RiskService.csproj -c Release -o /out
 
 # Usar la imagen base de .NET Runtime para ejecutar el proyecto
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 # Install curl for healthcheck
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app

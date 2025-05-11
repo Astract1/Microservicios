@@ -1,0 +1,261 @@
+.education-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.education-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.education-header h1 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.education-header p {
+  color: #7f8c8d;
+  font-size: 18px;
+}
+
+.education-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #3498db;
+}
+
+.tab-button.active {
+  color: #3498db;
+  border-bottom: 3px solid #3498db;
+}
+
+.courses-section h2,
+.resources-section h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Estilos para la sección de cursos */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.course-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.course-image-container {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+}
+
+.course-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.course-card:hover .course-image {
+  transform: scale(1.05);
+}
+
+.course-level {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.course-content {
+  padding: 15px;
+}
+
+.course-content h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.course-content p {
+  color: #5d6d7e;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 15px;
+  height: 65px;
+  overflow: hidden;
+}
+
+.course-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-duration {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.course-button {
+  padding: 6px 12px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.course-button:hover {
+  background-color: #2980b9;
+}
+
+/* Estilos para la sección de recursos */
+.resources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.resource-item {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.resource-icon {
+  font-size: 28px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.resource-content {
+  flex: 1;
+}
+
+.resource-content h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.resource-content p {
+  color: #5d6d7e;
+  font-size: 14px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.resource-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 13px;
+  color: #7f8c8d;
+}
+
+.resource-type,
+.resource-size,
+.resource-duration {
+  background-color: #f8f9fa;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.resource-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  margin-left: 15px;
+}
+
+.resource-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.resource-button.download {
+  background-color: #3498db;
+  color: white;
+}
+
+.resource-button.download:hover {
+  background-color: #2980b9;
+}
+
+.resource-button.view {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.resource-button.view:hover {
+  background-color: #27ae60;
+}
+
+@media (max-width: 768px) {
+  .resource-item {
+    flex-direction: column;
+  }
+  
+  .resource-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .resource-actions {
+    flex-direction: row;
+    margin-left: 0;
+    margin-top: 15px;
+  }
+} 

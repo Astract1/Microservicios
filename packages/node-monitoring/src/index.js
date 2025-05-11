@@ -3,6 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const pool = require('./db');
 require('dotenv').config();
+const { swaggerUi, swaggerDocs } = require('./swagger');
 
 // Importar servicios
 const airQualityService = require('./services/airQualityService');
@@ -14,7 +15,7 @@ const schedulerService = require('./services/schedulerService');
 const healthRoutes = require('./routes/health');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Middleware para procesar JSON
 app.use(express.json());
@@ -22,6 +23,30 @@ app.use(express.json());
 // Habilitar CORS para todas las rutas
 app.use(cors());
 
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     tags:
+ *       - Sistema
+ *     summary: Verificar estado del servicio
+ *     description: Retorna información básica del servicio para confirmar que está funcionando
+ *     responses:
+ *       200:
+ *         description: Operación exitosa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 service:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
 // Endpoint básico para comprobar que el servicio sigue funcionando
 app.get('/', (req, res) => {
   res.json({
@@ -31,9 +56,31 @@ app.get('/', (req, res) => {
   });
 });
 
+// Configuración de la documentación Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs, { 
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }' 
+}));
+
 // Registrar rutas
 app.use('/api/health', healthRoutes);
 
+/**
+ * @swagger
+ * /api/diagnostics:
+ *   get:
+ *     tags:
+ *       - Sistema
+ *     summary: Verificar estado de las APIs y servicios
+ *     description: Retorna el estado de todas las APIs externas y servicios integrados
+ *     responses:
+ *       200:
+ *         description: Operación exitosa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiStatus'
+ */
 // Endpoint para verificar el estado de las APIs
 app.get('/api/diagnostics', async (req, res) => {
   const results = {
@@ -380,58 +427,65 @@ app.put('/api/alerts/thresholds/:parameter', async (req, res) => {
 
 // === ENDPOINTS COMBINADOS ===
 
-// Endpoint para obtener un dashboard completo ambiental
+/**
+ * @swagger
+ * /api/dashboard:
+ *   get:
+ *     tags:
+ *       - Monitoreo
+ *     summary: Obtener datos para el dashboard
+ *     description: Retorna todos los datos necesarios para mostrar en el dashboard
+ *     responses:
+ *       200:
+ *         description: Operación exitosa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 airQuality:
+ *                   $ref: '#/components/schemas/AirQuality'
+ *                 weather:
+ *                   $ref: '#/components/schemas/Weather'
+ *                 alerts:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Alert'
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
+// Endpoint para obtener todos los datos necesarios para el dashboard
 app.get('/api/dashboard', async (req, res) => {
   try {
-    // Obtener datos de calidad del aire actual
+    // Obtenemos datos de calidad del aire
     const airQuality = await airQualityService.getAirQualityData();
     
-    // Obtener datos meteorológicos actuales
-    const weather = await weatherService.getCurrentWeather();
+    // Obtenemos datos meteorológicos
+    const weather = await weatherService.getWeatherData();
     
-    // Obtener alertas activas
+    // Obtenemos alertas activas
     const alerts = await alertService.getActiveAlerts();
     
-    // Variable para almacenar el pronóstico de lluvia
-    let rainForecast = [];
+    // Obtenemos recomendaciones basadas en los datos actuales
+    const recommendations = generateRecommendations(airQuality, weather, alerts);
     
-    try {
-      // Obtener pronóstico de lluvia para las próximas 24 horas
-      const forecast = await weatherService.getWeatherForecast(1);
-      
-      // Verificar que forecast.data.forecast existe y es un array
-      if (forecast?.data?.forecast && Array.isArray(forecast.data.forecast)) {
-        rainForecast = forecast.data.forecast
-          .filter(item => new Date(item.date).getTime() <= Date.now() + 24 * 60 * 60 * 1000)
-          .map(item => ({
-            hora: new Date(item.date).toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'}),
-            probabilidad: item.pop || 0,
-            intensidad: item.precipitation || 0,
-            descripcion: item.description || 'No disponible'
-          }));
-      }
-    } catch (forecastError) {
-      console.error('Error al obtener pronóstico:', forecastError);
-      // Continúa con el resto del dashboard sin el pronóstico
-    }
-    
+    // Enviamos todos los datos combinados
     res.json({
-      timestamp: new Date().toISOString(),
-      airQuality: airQuality.data,
-      weather: weather.data,
+      airQuality,
+      weather,
       alerts,
-      rainForecast,
-      recommendations: generateRecommendations(airQuality.data, weather.data, alerts)
+      recommendations,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error al obtener dashboard ambiental:', error);
+    console.error('Error al obtener datos para el dashboard:', error);
     res.status(500).json({
-      message: 'Error al obtener dashboard ambiental',
+      message: 'Error al obtener datos para el dashboard',
       error: error.message
     });
   }
 });
-
 
 // Función para generar recomendaciones basadas en condiciones ambientales
 function generateRecommendations(airQuality, weather, alerts) {

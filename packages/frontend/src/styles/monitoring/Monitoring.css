@@ -1,0 +1,399 @@
+/* Monitoring.css - Estilos para la página principal de monitoreo */
+
+.monitoring-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.monitoring-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title-section h1 {
+  margin: 0;
+  color: #333;
+}
+
+.last-updated {
+  font-size: 14px;
+  color: #666;
+}
+
+.status-indicators {
+  display: flex;
+  gap: 15px;
+}
+
+/* Estilos para los indicadores de estado */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.status-indicator.online .status-dot {
+  background-color: #4CAF50;
+}
+
+.status-indicator.offline .status-dot {
+  background-color: #F44336;
+}
+
+.status-label {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.status-text {
+  color: #666;
+}
+
+/* Dashboard grid layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 20px;
+}
+
+.summary-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 20px;
+}
+
+/* Estilos para tarjetas de calidad del aire */
+.air-quality-card, 
+.weather-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  height: 100%;
+}
+
+.air-quality-card h3, 
+.weather-card h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.aqi-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 15px 0;
+  border: 3px solid;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  justify-content: center;
+  margin: 15px auto;
+}
+
+.aqi-value {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.aqi-label {
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.aqi-category {
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-align: center;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.air-quality-details, 
+.weather-details {
+  margin-top: 15px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.detail-label {
+  color: #666;
+}
+
+.detail-value {
+  font-weight: bold;
+}
+
+.data-source {
+  margin-top: 15px;
+  font-size: 12px;
+  color: #999;
+  text-align: right;
+}
+
+/* Estilos para la tarjeta del clima */
+.weather-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.weather-icon {
+  font-size: 3rem;
+  margin-right: 15px;
+}
+
+.temperature {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.weather-description {
+  text-align: center;
+  margin-bottom: 15px;
+  font-style: italic;
+  color: #666;
+}
+
+.rain-status {
+  margin-top: 10px;
+}
+
+.rain-indicator {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Estilos para el mapa */
+.map-section {
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.map-container {
+  position: relative;
+  height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.air-quality-map {
+  height: 100%;
+  width: 100%;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255,255,255,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Estilos para la sección de tendencias */
+.trends-section {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 20px;
+}
+
+.chart-wrapper {
+  height: 300px;
+}
+
+.plotly-chart {
+  width: 100%;
+  height: 100%;
+}
+
+/* Sección de alertas y recomendaciones */
+.info-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 20px;
+}
+
+.alerts-section, 
+.recommendations-section {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Estilos para el panel de alertas */
+.alerts-panel {
+  min-height: 200px;
+}
+
+.alert-count {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alert-item {
+  display: flex;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+.alert-icon {
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.alert-message {
+  flex-grow: 1;
+}
+
+.alert-timestamp {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.alert-low {
+  border-left: 4px solid #FFC107;
+}
+
+.alert-medium {
+  border-left: 4px solid #FF9800;
+}
+
+.alert-high {
+  border-left: 4px solid #F44336;
+}
+
+.alert-critical {
+  border-left: 4px solid #9C27B0;
+  background-color: #FCE4EC;
+}
+
+.no-alerts {
+  color: #666;
+  text-align: center;
+  margin-top: 50px;
+}
+
+/* Estilos para recomendaciones */
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  border-left: 4px solid #4CAF50;
+}
+
+.recommendation-icon {
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.recommendation-text {
+  flex-grow: 1;
+}
+
+.no-recommendations {
+  color: #666;
+  text-align: center;
+  margin-top: 50px;
+}
+
+/* Estilos para estados de carga */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+}
+
+.error-container {
+  max-width: 500px;
+  margin: 100px auto;
+  text-align: center;
+  padding: 20px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  border: 1px solid #ffcdd2;
+}
+
+.retry-button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .monitoring-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .status-indicators {
+    margin-top: 10px;
+  }
+  
+  .map-container {
+    height: 300px;
+  }
+} 

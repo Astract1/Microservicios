@@ -1,0 +1,175 @@
+/* AirQualityCard.css - Estilos para el componente de calidad del aire */
+
+.air-quality-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.air-quality-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
+}
+
+.air-quality-card.empty {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 200px;
+}
+
+.air-quality-card.empty p {
+  color: #888;
+  font-style: italic;
+}
+
+.aqi-display {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.aqi-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 20px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.aqi-circle:hover {
+  transform: scale(1.05);
+}
+
+.aqi-label {
+  font-size: 12px;
+  font-weight: normal;
+  margin-top: 2px;
+}
+
+.aqi-info {
+  flex: 1;
+}
+
+.aqi-category {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.aqi-location {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.aqi-timestamp {
+  font-size: 12px;
+  color: #888;
+}
+
+.pollutants {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 15px 10px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.pollutant {
+  text-align: center;
+  flex: 1;
+}
+
+.pollutant-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.pollutant-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.aqi-scale {
+  margin-top: auto;
+}
+
+.scale-bar {
+  height: 8px;
+  border-radius: 4px;
+  position: relative;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.scale-gradient {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right, 
+    #00E400 0%, 
+    #FFFF00 20%, 
+    #FF7E00 40%, 
+    #FF0000 60%, 
+    #99004C 80%, 
+    #7E0023 100%
+  );
+}
+
+.scale-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border: 2px solid #333;
+  border-radius: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Estilos responsive */
+@media (max-width: 600px) {
+  .aqi-display {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .aqi-circle {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .pollutants {
+    flex-wrap: wrap;
+  }
+  
+  .pollutant {
+    flex-basis: 50%;
+    margin-bottom: 10px;
+  }
+} 

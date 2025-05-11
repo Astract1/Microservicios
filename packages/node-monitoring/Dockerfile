@@ -1,5 +1,5 @@
 # Etapa de construcción
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install curl for healthcheck
 RUN apk add --no-cache curl
@@ -18,6 +18,8 @@ COPY package*.json ./
 
 # Instalar dependencias
 RUN npm install
+# Instalar específicamente las dependencias de Swagger
+RUN npm install swagger-jsdoc swagger-ui-express
 
 # Copiar resto del código
 COPY . .
@@ -29,7 +31,7 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Puerto de exposición
-EXPOSE 3000
+EXPOSE 3001
 
 # Comando para iniciar el servicio
 CMD ["node", "src/index.js"]

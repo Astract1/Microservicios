@@ -1,0 +1,32 @@
+/* StatusIndicator.css - Estilos para el indicador de estado */
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.indicator-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.indicator-label {
+  color: #555;
+  font-weight: 500;
+}
+
+/* Estilos responsive */
+@media (max-width: 480px) {
+  .status-indicator {
+    font-size: 12px;
+  }
+  
+  .indicator-dot {
+    width: 10px;
+    height: 10px;
+  }
+} 
