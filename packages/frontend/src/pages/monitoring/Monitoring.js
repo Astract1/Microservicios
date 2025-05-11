@@ -111,19 +111,37 @@ const Monitoring = () => {
         </div>
         <div className="status-indicators">
           <StatusIndicator 
-            status={apiStatus?.apis?.iqair?.status === 'success' ? true : apiStatus ? false : 'loading'} 
+            status={apiStatus && apiStatus.apis ? 
+              (apiStatus.apis.iqair && apiStatus.apis.iqair.status === 'success' ? true : false) : 
+              'loading'
+            } 
             label="API Calidad del Aire" 
-            message={apiStatus?.apis?.iqair?.status === 'success' ? 'Conectado' : 'Desconectado'}
+            message={apiStatus && apiStatus.apis && apiStatus.apis.iqair ? 
+              (apiStatus.apis.iqair.status === 'success' ? 'Conectado' : 'Desconectado') : 
+              'Verificando estado...'
+            }
           />
           <StatusIndicator 
-            status={apiStatus?.apis?.openweathermap?.status === 'success' ? true : apiStatus ? false : 'loading'} 
+            status={apiStatus && apiStatus.apis ? 
+              (apiStatus.apis.openweathermap && apiStatus.apis.openweathermap.status === 'success' ? true : false) : 
+              'loading'
+            } 
             label="API Clima" 
-            message={apiStatus?.apis?.openweathermap?.status === 'success' ? 'Conectado' : 'Desconectado'}
+            message={apiStatus && apiStatus.apis && apiStatus.apis.openweathermap ? 
+              (apiStatus.apis.openweathermap.status === 'success' ? 'Conectado' : 'Desconectado') : 
+              'Verificando estado...'
+            }
           />
           <StatusIndicator 
-            status={apiStatus?.db?.status === 'connected' ? true : apiStatus ? false : 'loading'} 
+            status={apiStatus && apiStatus.db ? 
+              (apiStatus.db.status === 'connected' ? true : false) : 
+              'loading'
+            } 
             label="Base de Datos" 
-            message={apiStatus?.db?.status === 'connected' ? 'Conectado' : 'Desconectado'}
+            message={apiStatus && apiStatus.db ? 
+              (apiStatus.db.status === 'connected' ? 'Conectado' : 'Desconectado') : 
+              'Verificando estado...'
+            }
           />
         </div>
       </header>

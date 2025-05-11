@@ -137,7 +137,7 @@ const Education = () => {
             {courses.map(course => (
               <div key={course.id} className="course-card">
                 <div className="course-image-container">
-                  <img src={course.image} alt={course.title} className="course-image" />
+                  <img src={'/assets/images/pollution.jpg'} alt={course.title} className="course-image" />
                   <div className="course-level">{course.level}</div>
                 </div>
                 <div className="course-content">
