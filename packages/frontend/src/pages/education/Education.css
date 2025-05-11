@@ -1,49 +1,55 @@
 .education-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 2rem;
 }
 
 .education-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 3rem;
 }
 
 .education-header h1 {
-  color: #2c3e50;
-  margin-bottom: 10px;
+  color: #2d3748;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
 }
 
 .education-header p {
-  color: #7f8c8d;
-  font-size: 18px;
+  color: #4a5568;
+  font-size: 1.125rem;
 }
 
 .education-tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #e0e0e0;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
 }
 
 .tab-button {
-  padding: 12px 24px;
-  background: none;
+  padding: 0.75rem 1.5rem;
   border: none;
-  font-size: 16px;
+  background: none;
+  color: #4a5568;
+  font-size: 1rem;
   font-weight: 500;
-  color: #7f8c8d;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.5rem;
 }
 
 .tab-button:hover {
-  color: #3498db;
+  color: #2b6cb0;
+  background-color: #ebf8ff;
 }
 
 .tab-button.active {
-  color: #3498db;
-  border-bottom: 3px solid #3498db;
+  color: #2b6cb0;
+  background-color: #ebf8ff;
+  border-bottom: 2px solid #2b6cb0;
 }
 
 .courses-section h2,
@@ -257,5 +263,23 @@
     flex-direction: row;
     margin-left: 0;
     margin-top: 15px;
+  }
+
+  .education-container {
+    padding: 1rem;
+  }
+
+  .education-header h1 {
+    font-size: 2rem;
+  }
+
+  .education-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tab-button {
+    width: 100%;
+    text-align: center;
   }
 } 

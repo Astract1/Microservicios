@@ -9,6 +9,7 @@
         "http-proxy-middleware": "^3.0.5",
         "leaflet": "^1.9.4",
         "leaflet.markercluster": "^1.5.3",
+        "plotly.js-dist-min": "^3.0.1",
         "react-leaflet": "^5.0.0",
         "react-leaflet-markercluster": "^5.0.0-rc.0"
     }
