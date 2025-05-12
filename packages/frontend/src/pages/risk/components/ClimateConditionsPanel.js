@@ -1,4 +1,4 @@
-// packages/frontend/src/pages/risk/components/ClimateConditionsPanel.js
+// packages/frontend/src/pages/risk
 
 import React, { useEffect, useState } from 'react';
 import { riskApi } from '../services/riskApi';
