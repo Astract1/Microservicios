@@ -18,7 +18,7 @@ services:
   #=======================================================
   mariadb:
     image: mariadb:10.6
-    container_name: mariadb
+    container_name: mariadb-environment-microservice
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
@@ -55,7 +55,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - DB_HOST=mariadb
+      - DB_HOST=mariadb-environment-microservice
       - DB_USER=root
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
@@ -87,7 +87,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3002
-      - DB_HOST=mariadb
+      - DB_HOST=mariadb-environment-microservice
       - DB_USER=root
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
@@ -245,7 +245,7 @@ services:
     container_name: phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: mariadb
+      PMA_HOST: mariadb-environment-microservice
       PMA_USER: root
       PMA_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
     ports:

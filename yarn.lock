@@ -1259,6 +1259,35 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.57.1.tgz"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
+<<<<<<< HEAD
+=======
+"@fortawesome/fontawesome-common-types@6.7.2":
+  version "6.7.2"
+  resolved "https://registry.npmjs.org/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-6.7.2.tgz"
+  integrity sha512-Zs+YeHUC5fkt7Mg1l6XTniei3k4bwG/yo3iFUtZWd/pMx9g3fdvkSK9E0FOC+++phXOka78uJcYb8JaFkW52Xg==
+
+"@fortawesome/fontawesome-svg-core@~1 || ~6":
+  version "6.7.2"
+  resolved "https://registry.npmjs.org/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-6.7.2.tgz"
+  integrity sha512-yxtOBWDrdi5DD5o1pmVdq3WMCvnobT0LU6R8RyyVXPvFRd2o79/0NCuQoCjNTeZz9EzA9xS3JxNWfv54RIHFEA==
+  dependencies:
+    "@fortawesome/fontawesome-common-types" "6.7.2"
+
+"@fortawesome/free-solid-svg-icons@^6.7.2":
+  version "6.7.2"
+  resolved "https://registry.npmjs.org/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-6.7.2.tgz"
+  integrity sha512-GsBrnOzU8uj0LECDfD5zomZJIjrPhIlWU82AHwa2s40FKH+kcxQaBvBo3Z4TxyZHIyX8XTDxsyA33/Vx9eFuQA==
+  dependencies:
+    "@fortawesome/fontawesome-common-types" "6.7.2"
+
+"@fortawesome/react-fontawesome@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.npmjs.org/@fortawesome/react-fontawesome/-/react-fontawesome-0.2.2.tgz"
+  integrity sha512-EnkrprPNqI6SXJl//m29hpaNzOp1bruISWaOiRtkMi/xSvHJlzc2j2JAYS7egxt/EbjSNV/k6Xy0AQI6vB2+1g==
+  dependencies:
+    prop-types "^15.8.1"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 "@humanwhocodes/config-array@^0.13.0":
   version "0.13.0"
   resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.13.0.tgz"
@@ -1834,6 +1863,14 @@
   resolved "https://registry.npmjs.org/@react-leaflet/core/-/core-2.1.0.tgz"
   integrity sha512-Qk7Pfu8BSarKGqILj4x7bCSZ1pjuAPZ+qmRwH5S7mDS91VSbVVsJSrW4qA+GPrro8t69gFYVMWb1Zc4yFmPiVg==
 
+<<<<<<< HEAD
+=======
+"@react-leaflet/core@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/@react-leaflet/core/-/core-3.0.0.tgz"
+  integrity sha512-3EWmekh4Nz+pGcr+xjf0KNyYfC3U2JjnkWsh0zcqaexYqmmB5ZhH37kz41JXGmKzpaMZCnPofBBm64i+YrEvGQ==
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 "@react-native/assets-registry@0.79.2":
   version "0.79.2"
   resolved "https://registry.npmjs.org/@react-native/assets-registry/-/assets-registry-0.79.2.tgz"
@@ -1974,6 +2011,19 @@
   resolved "https://registry.npmjs.org/@react-spring/types/-/types-9.7.5.tgz"
   integrity sha512-HVj7LrZ4ReHWBimBvu2SKND3cDVUPWKLqRTmWe/fNY6o1owGOX0cAHbdPDTMelgBlVbrTKrre6lFkhqGZErK/g==
 
+<<<<<<< HEAD
+=======
+"@react-spring/web@^9.7.5":
+  version "9.7.5"
+  resolved "https://registry.npmjs.org/@react-spring/web/-/web-9.7.5.tgz"
+  integrity sha512-lmvqGwpe+CSttsWNZVr+Dg62adtKhauGwLyGE/RRyZ8AAMLgb9x3NDMA5RMElXo+IMyTkPp7nxTB8ZQlmhb6JQ==
+  dependencies:
+    "@react-spring/animated" "~9.7.5"
+    "@react-spring/core" "~9.7.5"
+    "@react-spring/shared" "~9.7.5"
+    "@react-spring/types" "~9.7.5"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 "@react-spring/web@~9.7.5":
   version "9.7.5"
   resolved "https://registry.npmjs.org/@react-spring/web/-/web-9.7.5.tgz"
@@ -2483,7 +2533,7 @@
   resolved "https://registry.npmjs.org/@types/http-errors/-/http-errors-2.0.4.tgz"
   integrity sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==
 
-"@types/http-proxy@^1.17.8":
+"@types/http-proxy@^1.17.15", "@types/http-proxy@^1.17.8":
   version "1.17.16"
   resolved "https://registry.npmjs.org/@types/http-proxy/-/http-proxy-1.17.16.tgz"
   integrity sha512-sdWoUajOB1cd0A8cRRQ1cfyWNbmFKLAqBB89Y8x5iYyG/mkJHc0YUH8pdWBy2omi9qtCpiIgGjuwO0dQST2l5w==
@@ -4827,6 +4877,13 @@ debug@^4.4.0:
   dependencies:
     ms "^2.1.3"
 
+debug@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/debug/-/debug-4.4.0.tgz"
+  integrity sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==
+  dependencies:
+    ms "^2.1.3"
+
 debug@4:
   version "4.4.0"
   resolved "https://registry.npmjs.org/debug/-/debug-4.4.0.tgz"
@@ -5248,6 +5305,14 @@ entities@^2.0.0:
   resolved "https://registry.npmjs.org/entities/-/entities-2.2.0.tgz"
   integrity sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==
 
+<<<<<<< HEAD
+=======
+entities@^4.4.0:
+  version "4.5.0"
+  resolved "https://registry.npmjs.org/entities/-/entities-4.5.0.tgz"
+  integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 error-ex@^1.3.1:
   version "1.3.2"
   resolved "https://registry.npmjs.org/error-ex/-/error-ex-1.3.2.tgz"
@@ -6188,7 +6253,11 @@ from2@^2.3.0:
     inherits "^2.0.1"
     readable-stream "^2.0.0"
 
+<<<<<<< HEAD
 "frontend@file:C:\\Users\\IRR\\Documents\\UNIVERSIDAD\\SEM 6\\WEB_2\\Microservicios\\packages\\frontend":
+=======
+"frontend@file:C:\\Users\\DUBAN\\Documents\\UMB\\6°Semestre\\web2\\Microservicios\\packages\\frontend":
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "0.1.0"
   resolved "file:packages/frontend"
   dependencies:
@@ -6878,6 +6947,18 @@ http-proxy-middleware@^2.0.3:
     is-plain-obj "^3.0.0"
     micromatch "^4.0.2"
 
+http-proxy-middleware@^3.0.5:
+  version "3.0.5"
+  resolved "https://registry.npmjs.org/http-proxy-middleware/-/http-proxy-middleware-3.0.5.tgz"
+  integrity sha512-GLZZm1X38BPY4lkXA01jhwxvDoOkkXqjgVyUzVxiEK4iuRu03PZoYHhHRwxnfhQMDuaxi3vVri0YgSro/1oWqg==
+  dependencies:
+    "@types/http-proxy" "^1.17.15"
+    debug "^4.3.6"
+    http-proxy "^1.18.1"
+    is-glob "^4.0.3"
+    is-plain-object "^5.0.0"
+    micromatch "^4.0.8"
+
 http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.npmjs.org/http-proxy/-/http-proxy-1.18.1.tgz"
@@ -7255,6 +7336,14 @@ is-plain-obj@^3.0.0:
   resolved "https://registry.npmjs.org/is-plain-obj/-/is-plain-obj-3.0.0.tgz"
   integrity sha512-gwsOE28k+23GP1B6vFl1oVh/WOzmawBrKwo5Ev6wMKzPkaXaCDIQKzLnvsA42DRlbVTWorkgTKIviAKCWkfUwA==
 
+<<<<<<< HEAD
+=======
+is-plain-object@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/is-plain-object/-/is-plain-object-5.0.0.tgz"
+  integrity sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q==
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 is-potential-custom-element-name@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz"
@@ -8301,7 +8390,16 @@ launch-editor@^2.6.0:
     picocolors "^1.0.0"
     shell-quote "^1.8.1"
 
+<<<<<<< HEAD
 leaflet@^1.9.0, leaflet@^1.9.4:
+=======
+leaflet.markercluster@^1.5.3:
+  version "1.5.3"
+  resolved "https://registry.npmjs.org/leaflet.markercluster/-/leaflet.markercluster-1.5.3.tgz"
+  integrity sha512-vPTw/Bndq7eQHjLBVlWpnGeLa3t+3zGiuM7fJwCkiMFq+nmRuG3RI3f7f4N4TDX7T4NpbAXpR2+NTRSEGfCSeA==
+
+leaflet@^1.3.1, leaflet@^1.9.0, leaflet@^1.9.4:
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "1.9.4"
   resolved "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz"
   integrity sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==
@@ -8355,6 +8453,16 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.npmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz"
   integrity sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==
 
+<<<<<<< HEAD
+=======
+linkify-it@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/linkify-it/-/linkify-it-5.0.0.tgz"
+  integrity sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==
+  dependencies:
+    uc.micro "^2.0.0"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 loader-runner@^4.2.0:
   version "4.3.0"
   resolved "https://registry.npmjs.org/loader-runner/-/loader-runner-4.3.0.tgz"
@@ -8572,6 +8680,21 @@ maplibre-gl@^4.5.2:
     tinyqueue "^3.0.0"
     vt-pbf "^3.1.3"
 
+<<<<<<< HEAD
+=======
+markdown-it@^14.0.0:
+  version "14.1.0"
+  resolved "https://registry.npmjs.org/markdown-it/-/markdown-it-14.1.0.tgz"
+  integrity sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==
+  dependencies:
+    argparse "^2.0.1"
+    entities "^4.4.0"
+    linkify-it "^5.0.0"
+    mdurl "^2.0.0"
+    punycode.js "^2.3.1"
+    uc.micro "^2.1.0"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 marky@^1.2.2:
   version "1.3.0"
   resolved "https://registry.npmjs.org/marky/-/marky-1.3.0.tgz"
@@ -8596,6 +8719,11 @@ mdn-data@2.0.4:
   version "2.0.4"
   resolved "https://registry.npmjs.org/mdn-data/-/mdn-data-2.0.4.tgz"
   integrity sha512-iV3XNKw06j5Q7mi6h+9vbx23Tv7JkjEVgKHW4pimwyDGWm0OIQntJJ+u1C6mg6mK1EaTv42XQ7w76yuzH7M2cA==
+
+mdurl@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/mdurl/-/mdurl-2.0.0.tgz"
+  integrity sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==
 
 media-typer@0.3.0:
   version "0.3.0"
@@ -9090,6 +9218,24 @@ node-cron@^3.0.3:
   dependencies:
     uuid "8.3.2"
 
+<<<<<<< HEAD
+=======
+"node-education@file:C:\\Users\\DUBAN\\Documents\\UMB\\6°Semestre\\web2\\Microservicios\\packages\\node-education":
+  version "1.0.0"
+  resolved "file:packages/node-education"
+  dependencies:
+    "@react-spring/web" "^9.7.5"
+    axios "^1.8.4"
+    cors "^2.8.5"
+    dotenv "^16.4.7"
+    express "^4.21.2"
+    markdown-it "^14.0.0"
+    mysql2 "^3.14.0"
+    node-cron "^3.0.3"
+    plotly.js-dist-min "^3.0.1"
+    slugify "^1.6.6"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 node-forge@^1:
   version "1.3.1"
   resolved "https://registry.npmjs.org/node-forge/-/node-forge-1.3.1.tgz"
@@ -9100,7 +9246,11 @@ node-int64@^0.4.0:
   resolved "https://registry.npmjs.org/node-int64/-/node-int64-0.4.0.tgz"
   integrity sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==
 
+<<<<<<< HEAD
 "node-monitoring@file:C:\\Users\\IRR\\Documents\\UNIVERSIDAD\\SEM 6\\WEB_2\\Microservicios\\packages\\node-monitoring":
+=======
+"node-monitoring@file:C:\\Users\\DUBAN\\Documents\\UMB\\6°Semestre\\web2\\Microservicios\\packages\\node-monitoring":
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "1.0.0"
   resolved "file:packages/node-monitoring"
   dependencies:
@@ -9117,11 +9267,25 @@ node-releases@^2.0.19:
   resolved "https://registry.npmjs.org/node-releases/-/node-releases-2.0.19.tgz"
   integrity sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==
 
+<<<<<<< HEAD
 nodemon@^3.0.1:
   version "3.1.9"
   resolved "https://registry.npmjs.org/nodemon/-/nodemon-3.1.9.tgz"
   integrity sha512-hdr1oIb2p6ZSxu3PB2JWWYS7ZQ0qvaZsc3hK8DR8f02kRzc8rjYmxAIvdz+aYC+8F2IjNaB7HMcSDg8nQpJxyg==
   dependencies:
+=======
+"node-service@file:C:\\Users\\DUBAN\\Documents\\UMB\\6°Semestre\\web2\\Microservicios\\packages\\node-service":
+  version "1.0.0"
+  resolved "file:packages/node-service"
+  dependencies:
+    express "^4.21.2"
+
+nodemon@^3.0.1:
+  version "3.1.9"
+  resolved "https://registry.npmjs.org/nodemon/-/nodemon-3.1.9.tgz"
+  integrity sha512-hdr1oIb2p6ZSxu3PB2JWWYS7ZQ0qvaZsc3hK8DR8f02kRzc8rjYmxAIvdz+aYC+8F2IjNaB7HMcSDg8nQpJxyg==
+  dependencies:
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
     chokidar "^3.5.2"
     debug "^4"
     ignore-by-default "^1.0.1"
@@ -9618,6 +9782,7 @@ pkg-up@^3.1.0:
   dependencies:
     find-up "^3.0.0"
 
+<<<<<<< HEAD
 plotly.js@^2.30.0, plotly.js@>1.34.0:
   version "2.35.3"
   resolved "https://registry.npmjs.org/plotly.js/-/plotly.js-2.35.3.tgz"
@@ -9676,6 +9841,71 @@ plotly.js@^2.30.0, plotly.js@>1.34.0:
     webgl-context "^2.2.0"
     world-calendars "^1.0.3"
 
+=======
+plotly.js-dist-min@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/plotly.js-dist-min/-/plotly.js-dist-min-3.0.1.tgz"
+  integrity sha512-RReOqr6TfoHaTbVAoHR1UbTCOSRDsQ7Hbthd+3XAxOwaKmxCE3oejMhLG7urQSqWC65DAcSKV23kZd8e+7mG7w==
+
+plotly.js@^2.30.0, plotly.js@>1.34.0:
+  version "2.35.3"
+  resolved "https://registry.npmjs.org/plotly.js/-/plotly.js-2.35.3.tgz"
+  integrity sha512-7RaC6FxmCUhpD6H4MpD+QLUu3hCn76I11rotRefrh3m1iDvWqGnVqVk9dSaKmRAhFD3vsNsYea0OxnR1rc2IzQ==
+  dependencies:
+    "@plotly/d3" "3.8.2"
+    "@plotly/d3-sankey" "0.7.2"
+    "@plotly/d3-sankey-circular" "0.33.1"
+    "@plotly/mapbox-gl" "1.13.4"
+    "@turf/area" "^7.1.0"
+    "@turf/bbox" "^7.1.0"
+    "@turf/centroid" "^7.1.0"
+    base64-arraybuffer "^1.0.2"
+    canvas-fit "^1.5.0"
+    color-alpha "1.0.4"
+    color-normalize "1.5.0"
+    color-parse "2.0.0"
+    color-rgba "2.1.1"
+    country-regex "^1.1.0"
+    css-loader "^7.1.2"
+    d3-force "^1.2.1"
+    d3-format "^1.4.5"
+    d3-geo "^1.12.1"
+    d3-geo-projection "^2.9.0"
+    d3-hierarchy "^1.1.9"
+    d3-interpolate "^3.0.1"
+    d3-time "^1.1.0"
+    d3-time-format "^2.2.3"
+    fast-isnumeric "^1.1.4"
+    gl-mat4 "^1.2.0"
+    gl-text "^1.4.0"
+    has-hover "^1.0.1"
+    has-passive-events "^1.0.0"
+    is-mobile "^4.0.0"
+    maplibre-gl "^4.5.2"
+    mouse-change "^1.4.0"
+    mouse-event-offset "^3.0.2"
+    mouse-wheel "^1.2.0"
+    native-promise-only "^0.8.1"
+    parse-svg-path "^0.1.2"
+    point-in-polygon "^1.1.0"
+    polybooljs "^1.2.2"
+    probe-image-size "^7.2.3"
+    regl "npm:@plotly/regl@^2.1.2"
+    regl-error2d "^2.0.12"
+    regl-line2d "^3.1.3"
+    regl-scatter2d "^3.3.1"
+    regl-splom "^1.0.14"
+    strongly-connected-components "^1.0.1"
+    style-loader "^4.0.0"
+    superscript-text "^1.0.0"
+    svg-path-sdf "^1.1.3"
+    tinycolor2 "^1.4.2"
+    to-px "1.0.1"
+    topojson-client "^3.1.0"
+    webgl-context "^2.2.0"
+    world-calendars "^1.0.3"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 point-in-polygon@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/point-in-polygon/-/point-in-polygon-1.1.0.tgz"
@@ -10379,6 +10609,14 @@ pstree.remy@^1.1.8:
   version "1.1.8"
   resolved "https://registry.npmjs.org/pstree.remy/-/pstree.remy-1.1.8.tgz"
   integrity sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==
+<<<<<<< HEAD
+=======
+
+punycode.js@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/punycode.js/-/punycode.js-2.3.1.tgz"
+  integrity sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 
 punycode@^2.1.0, punycode@^2.1.1, punycode@^2.3.1:
   version "2.3.1"
@@ -10503,7 +10741,11 @@ react-devtools-core@^6.1.1:
     shell-quote "^1.6.1"
     ws "^7"
 
+<<<<<<< HEAD
 "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0", react-dom@^18.0.0, react-dom@^18.2.0, react-dom@^19.0.0:
+=======
+"react-dom@^16.8.0 || ^17.0.0 || ^18.0.0", react-dom@^18.0.0, react-dom@^18.2.0:
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "18.3.1"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz"
   integrity sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==
@@ -10511,7 +10753,11 @@ react-devtools-core@^6.1.1:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
 
+<<<<<<< HEAD
 react-dom@>=16.13, react-dom@>=16.8, react-dom@>=18.0.0:
+=======
+react-dom@^19.0.0, react-dom@>=16.13, react-dom@>=16.8, react-dom@>=18.0.0:
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "19.1.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-19.1.0.tgz"
   integrity sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==
@@ -10548,6 +10794,19 @@ react-is@^18.0.0:
     react-reconciler "~0.29.0"
     scheduler "^0.23.0"
 
+<<<<<<< HEAD
+=======
+react-leaflet-markercluster@^5.0.0-rc.0:
+  version "5.0.0-rc.0"
+  resolved "https://registry.npmjs.org/react-leaflet-markercluster/-/react-leaflet-markercluster-5.0.0-rc.0.tgz"
+  integrity sha512-jWa4bPD5LfLV3Lid1RWgl+yKUuQtnqeYtJzzLb/fiRjvX+rtwzY8pMoUFuygqyxNrWxMTQlWKBHxkpI7Sxvu4Q==
+  dependencies:
+    "@react-leaflet/core" "^3.0.0"
+    leaflet "^1.9.4"
+    leaflet.markercluster "^1.5.3"
+    react-leaflet "^5.0.0"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 react-leaflet@^4.2.1:
   version "4.2.1"
   resolved "https://registry.npmjs.org/react-leaflet/-/react-leaflet-4.2.1.tgz"
@@ -10555,6 +10814,16 @@ react-leaflet@^4.2.1:
   dependencies:
     "@react-leaflet/core" "^2.1.0"
 
+<<<<<<< HEAD
+=======
+react-leaflet@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/react-leaflet/-/react-leaflet-5.0.0.tgz"
+  integrity sha512-CWbTpr5vcHw5bt9i4zSlPEVQdTVcML390TjeDG0cK59z1ylexpqC6M1PJFjV8jD7CF+ACBFsLIDs6DRMoLEofw==
+  dependencies:
+    "@react-leaflet/core" "^3.0.0"
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 react-native@*, react-native@>=0.58, react-native@>=0.78:
   version "0.79.2"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.79.2.tgz"
@@ -10725,14 +10994,22 @@ react-zdog@>=1.0:
     react-dom "^18.2.0"
     resize-observer-polyfill "^1.5.1"
 
+<<<<<<< HEAD
 react@*, "react@^16.8.0 || ^17.0.0 || ^18.0.0", react@^18.0.0, react@^18.2.0, react@^19.0.0, "react@16.8.0  || >=17.0.0 || >=18.0.0":
+=======
+react@*, "react@^16.8.0 || ^17.0.0 || ^18.0.0", react@^18.0.0, react@^18.2.0, "react@16.8.0  || >=17.0.0 || >=18.0.0":
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "18.3.1"
   resolved "https://registry.npmjs.org/react/-/react-18.3.1.tgz"
   integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
   dependencies:
     loose-envify "^1.1.0"
 
+<<<<<<< HEAD
 "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.3.1, react@^19.1.0, "react@>= 16", react@>=16.13, react@>=16.8, react@>=17.0, react@>=18.0, react@>=18.0.0, react@>0.13.0:
+=======
+"react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.3.1, react@^19.0.0, react@^19.1.0, "react@>= 16", react@>=16.13, react@>=16.3, react@>=16.8, react@>=17.0, react@>=18.0, react@>=18.0.0, react@>0.13.0:
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
   version "19.1.0"
   resolved "https://registry.npmjs.org/react/-/react-19.1.0.tgz"
   integrity sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==
@@ -11528,6 +11805,14 @@ slash@^4.0.0:
   resolved "https://registry.npmjs.org/slash/-/slash-4.0.0.tgz"
   integrity sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==
 
+<<<<<<< HEAD
+=======
+slugify@^1.6.6:
+  version "1.6.6"
+  resolved "https://registry.npmjs.org/slugify/-/slugify-1.6.6.tgz"
+  integrity sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 sockjs-client@^1.4.0:
   version "1.4.0"
   resolved "https://registry.npmjs.org/sockjs-client/-/sockjs-client-1.4.0.tgz"
@@ -12492,6 +12777,14 @@ typedarray@^0.0.6:
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.9.5.tgz"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
+<<<<<<< HEAD
+=======
+uc.micro@^2.0.0, uc.micro@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/uc.micro/-/uc.micro-2.1.0.tgz"
+  integrity sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==
+
+>>>>>>> 5a118a62378a20c1fe4741fdb728245e15f28041
 unbox-primitive@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/unbox-primitive/-/unbox-primitive-1.1.0.tgz"
