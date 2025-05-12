@@ -1,52 +1,69 @@
-using RiskService.Services;
-using RiskService.Data;
 using Microsoft.EntityFrameworkCore;
+using RiskService.Data;
+using RiskService.Services;
+using RiskService.Services.Weather;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Agregar servicios HTTP
-builder.Services.AddHttpClient();
-
-// Agregar controladores
+// Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Risk API", Version = "v1" });
+});
 
-// Agregar health checks
-builder.Services.AddHealthChecks();
+// Configure DbContext
+builder.Services.AddDbContext<RiskDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registrar servicios
-builder.Services.AddScoped<RiskEvaluationService>();
+// Register services
+builder.Services.AddScoped<IRiskEvaluationService, RiskEvaluationService>();
+builder.Services.AddScoped<IApiIntegrationService, ApiIntegrationService>();
 builder.Services.AddScoped<WeatherDataProvider>();
 
-// Configurar DbContext con SQLite
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                       Environment.GetEnvironmentVariable("DATABASE_CONNECTION");
+// Configure HttpClient
+builder.Services.AddHttpClient();
 
-builder.Services.AddDbContext<RiskDbContext>(options =>
-    options.UseSqlite(connectionString));
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
-// Ejecutar migraciones automáticamente
-using (var scope = app.Services.CreateScope())
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<RiskDbContext>();
-    try
-    {
-        dbContext.Database.Migrate();
-        Console.WriteLine("Migraciones aplicadas correctamente.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error al aplicar migraciones: {ex.Message}");
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-// Configurar middleware
-app.UseRouting();
+// Enable CORS
+app.UseCors();
 
-// Map health checks endpoint
-app.MapHealthChecks("/health");
+// app.UseHttpsRedirection(); // Comentado para permitir HTTP
+app.UseAuthorization();
+
+// Log all registered endpoints
+var endpoints = app.Services.GetRequiredService<IEnumerable<EndpointDataSource>>()
+    .SelectMany(es => es.Endpoints);
+Console.WriteLine("Registered endpoints:");
+foreach (var endpoint in endpoints)
+{
+    Console.WriteLine(endpoint.DisplayName);
+}
 
 app.MapControllers();
+
+// Log the application URLs
+Console.WriteLine($"Application URLs: {string.Join(", ", app.Urls)}");
 
 app.Run();

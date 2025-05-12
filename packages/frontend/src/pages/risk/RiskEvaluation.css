@@ -230,4 +230,58 @@
   .risk-area-name {
     font-size: 14px;
   }
+}
+
+.risk-evaluation {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.user-data-form,
+.climate-conditions-panel,
+.risk-exposure-test,
+.risk-calculator,
+.risk-history {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+h1, h2, h3 {
+  color: #333;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.risk-level-indicator {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.recommendations ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.recommendations li {
+  margin: 5px 0;
 } 

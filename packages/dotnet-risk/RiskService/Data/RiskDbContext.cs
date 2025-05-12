@@ -9,6 +9,9 @@ namespace RiskService.Data
 
         // DbSet para la tabla RiskResults
         public DbSet<RiskResult> RiskResults { get; set; }
+        public DbSet<RiskEvaluation> RiskEvaluations { get; set; }
+        public DbSet<UserData> Users { get; set; }
+        public DbSet<EnvironmentalConditions> EnvironmentalConditions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,6 +26,16 @@ namespace RiskService.Data
                 entity.Property(e => e.Description).HasMaxLength(500); // Longitud máxima opcional
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP"); // Valor predeterminado
             });
+
+            modelBuilder.Entity<RiskEvaluation>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId);
+
+            modelBuilder.Entity<RiskEvaluation>()
+                .HasOne(r => r.CurrentConditions)
+                .WithOne()
+                .HasForeignKey<EnvironmentalConditions>(e => e.RiskEvaluationId);
         }
     }
 }

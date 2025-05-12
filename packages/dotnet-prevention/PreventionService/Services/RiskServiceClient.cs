@@ -19,7 +19,7 @@ namespace PreventionService.Services
            
             var userData = new { userId = userId };
 
-            var response = await _httpClient.PostAsJsonAsync("/api/risk/evaluate", userData);
+            var response = await _httpClient.PostAsJsonAsync("/api/risk/evaluacion-riesgo", userData);
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();

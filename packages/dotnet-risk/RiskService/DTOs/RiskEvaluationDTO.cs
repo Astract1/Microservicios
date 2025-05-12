@@ -2,17 +2,21 @@ namespace RiskService.DTOs
 {
     public class RiskEvaluationDto
     {
-        public required UserDataDto UserData { get; set; } // Datos del usuario
-        public required EnvironmentalDataDto EnvironmentalData { get; set; } // Datos ambientales
+        public UserDataDto UserData { get; set; }
+        public EnvironmentalDataDto EnvironmentalData { get; set; }
     }
 
-    public class EnvironmentalData
+    public class UserDataDto
     {
-        public double Temperature { get; set; }
-        public double Humidity { get; set; }
-        public int AirQualityIndex { get; set; }
-        public double WindSpeed { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public int Id { get; set; }
+        public int Age { get; set; }
+        public string Location { get; set; }
+        public string HealthStatus { get; set; }
+        public string[] MedicalConditions { get; set; }
+    }
+
+    public class EnvironmentalDataDto
+    {
+        public string Location { get; set; }
     }
 }

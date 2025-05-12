@@ -1,86 +1,153 @@
 using RiskService.Models;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace RiskService.Services
 {
-    public class RiskEvaluationService
+    public class RiskEvaluationService : IRiskEvaluationService
     {
-        public RiskEvaluationResult EvaluateRisk(UserData userData, EnvironmentalData environmentalData)
+        public string CalculateRiskLevel(UserData userData, EnvironmentalConditions environmentalData)
         {
-            var riskFactors = new List<string>();
-            var recommendations = new List<string>();
-            int riskScore = 0;
+            // Lógica para calcular el nivel de riesgo
+            var riskScore = 0;
 
-            // Evaluar temperatura
-            if (environmentalData.Temperature > 35)
+            // Factores de edad
+            if (userData.Age < 18 || userData.Age > 65) riskScore += 2;
+            else if (userData.Age < 30) riskScore += 1;
+
+            // Factores ambientales
+            if (environmentalData.Temperature > 30) riskScore += 2;
+            if (environmentalData.Humidity > 80) riskScore += 1;
+            if (environmentalData.AirQualityIndex > 100) riskScore += 2;
+
+            // Determinar nivel de riesgo
+            return riskScore switch
             {
-                riskScore += 30;
-                riskFactors.Add("Temperatura extremadamente alta");
-                recommendations.Add("Evitar exposición prolongada al sol");
+                <= 2 => "Bajo",
+                <= 4 => "Medio",
+                _ => "Alto"
+            };
+        }
+
+        public string GenerateRecommendations(UserData userData, EnvironmentalConditions environmentalData)
+        {
+            var recommendations = new List<string>();
+
+            if (environmentalData.Temperature > 30)
+            {
+                recommendations.Add("Evitar actividades al aire libre durante las horas más calurosas");
                 recommendations.Add("Mantenerse hidratado");
             }
-            else if (environmentalData.Temperature < 5)
-            {
-                riskScore += 25;
-                riskFactors.Add("Temperatura muy baja");
-                recommendations.Add("Abrigarse adecuadamente");
-                recommendations.Add("Evitar exposición prolongada al frío");
-            }
 
-            // Evaluar calidad del aire
             if (environmentalData.AirQualityIndex > 100)
             {
-                riskScore += 35;
-                riskFactors.Add("Mala calidad del aire");
-                recommendations.Add("Usar mascarilla en exteriores");
+                recommendations.Add("Usar mascarilla al salir");
                 recommendations.Add("Limitar actividades al aire libre");
             }
 
-            // Evaluar humedad
-            if (environmentalData.Humidity > 80)
+            if (userData.Age > 65)
             {
-                riskScore += 15;
-                riskFactors.Add("Humedad alta");
-                recommendations.Add("Mantener ambientes ventilados");
+                recommendations.Add("Consultar con un médico antes de realizar actividades intensas");
             }
 
-            // Evaluar viento
-            if (environmentalData.WindSpeed > 50)
+            return string.Join(", ", recommendations);
+        }
+
+        public string EvaluateTestResponses(Dictionary<string, string> responses)
+        {
+            var riskScore = 0;
+
+            foreach (var response in responses)
             {
-                riskScore += 20;
-                riskFactors.Add("Vientos fuertes");
-                recommendations.Add("Evitar áreas abiertas");
+                switch (response.Key.ToLower())
+                {
+                    case "edad":
+                        if (int.TryParse(response.Value, out int age))
+                        {
+                            if (age < 18 || age > 65) riskScore += 2;
+                            else if (age < 30) riskScore += 1;
+                        }
+                        break;
+                    case "condiciones_medicas":
+                        if (response.Value.ToLower().Contains("si")) riskScore += 2;
+                        break;
+                    case "actividad_fisica":
+                        if (response.Value.ToLower().Contains("alta")) riskScore += 1;
+                        break;
+                }
             }
 
-            // Evaluar factores del usuario
-            if (userData.Age > 65 || userData.Age < 12)
+            return riskScore switch
             {
-                riskScore += 20;
-                riskFactors.Add("Grupo de edad vulnerable");
-                recommendations.Add("Mantener especial precaución por grupo de edad");
-            }
-
-            if (userData.MedicalConditions?.Any() ?? false)
-            {
-                riskScore += 25;
-                riskFactors.Add("Condiciones médicas preexistentes");
-                recommendations.Add("Consultar con su médico sobre precauciones específicas");
-            }
-
-            string riskLevel = riskScore switch
-            {
-                > 70 => "Alto",
-                > 40 => "Medio",
-                _ => "Bajo"
+                <= 2 => "Bajo",
+                <= 4 => "Medio",
+                _ => "Alto"
             };
+        }
 
-            return new RiskEvaluationResult
+        public string GenerateTestBasedRecommendations(Dictionary<string, string> responses)
+        {
+            var recommendations = new List<string>();
+
+            foreach (var response in responses)
             {
-                RiskLevel = riskLevel,
-                RiskScore = riskScore,
-                RiskFactors = riskFactors.ToArray(),
-                Recommendations = recommendations.ToArray(),
-                Timestamp = DateTime.UtcNow
+                switch (response.Key.ToLower())
+                {
+                    case "edad":
+                        if (int.TryParse(response.Value, out int age) && age > 65)
+                        {
+                            recommendations.Add("Consultar con un médico antes de realizar actividades intensas");
+                        }
+                        break;
+                    case "condiciones_medicas":
+                        if (response.Value.ToLower().Contains("si"))
+                        {
+                            recommendations.Add("Seguir las recomendaciones médicas específicas");
+                            recommendations.Add("Mantener medicamentos a mano");
+                        }
+                        break;
+                    case "actividad_fisica":
+                        if (response.Value.ToLower().Contains("alta"))
+                        {
+                            recommendations.Add("Ajustar la intensidad según las condiciones ambientales");
+                            recommendations.Add("Mantenerse hidratado durante la actividad");
+                        }
+                        break;
+                }
+            }
+
+            return string.Join(", ", recommendations);
+        }
+
+        // Métodos requeridos por la interfaz
+        public Task<RiskEvaluation> EvaluateRisk(UserData userData, EnvironmentalData environmentalData)
+        {
+            // Implementación de ejemplo
+            var evaluation = new RiskEvaluation
+            {
+                UserId = userData.Id,
+                RiskLevel = CalculateRiskLevel(userData, new EnvironmentalConditions()),
+                FactorsConsidered = "Factores de ejemplo",
+                EnvironmentalConditions = "Condiciones de ejemplo",
+                Recommendations = "Recomendaciones de ejemplo"
             };
+            return Task.FromResult(evaluation);
+        }
+
+        public Task<RiskEvaluation> ProcessTestResponse(TestResponse testResponse)
+        {
+            // Convertir las respuestas a un diccionario para reutilizar la lógica existente
+            var responsesDict = testResponse.Answers.ToDictionary(a => a.Question, a => a.Response);
+            var evaluation = new RiskEvaluation
+            {
+                UserId = testResponse.UserId,
+                TestResponses = System.Text.Json.JsonSerializer.Serialize(responsesDict),
+                RiskLevel = EvaluateTestResponses(responsesDict),
+                EvaluationDate = DateTime.UtcNow,
+                FactorsConsidered = "Evaluación basada en test interactivo",
+                Recommendations = GenerateTestBasedRecommendations(responsesDict)
+            };
+            return Task.FromResult(evaluation);
         }
     }
 }
