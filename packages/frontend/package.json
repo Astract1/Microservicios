@@ -10,17 +10,14 @@
     "leaflet": "^1.9.4",
     "plotly.js": "^2.30.0",
     "plotly.js-dist-min": "^3.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-leaflet": "^4.2.1",
     "react-plotly.js": "^2.6.0",
     "react-router-dom": "^6.22.0",
     "react-scripts": "5.0.1",
     "react-spring": "^9.7.3",
-    "web-vitals": "^2.1.4",
-    "@react-three/fiber": "^8.0.0",
-    "react-native": "^0.71.0",
-    "@react-spring/three": "^9.6.1"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
