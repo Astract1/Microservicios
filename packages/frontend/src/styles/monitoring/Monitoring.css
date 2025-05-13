@@ -11,6 +11,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .title-section h1 {
@@ -26,40 +28,45 @@
 .status-indicators {
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 /* Estilos para los indicadores de estado */
 .status-indicator {
+  min-width: 200px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-left: 4px solid #ccc;
+}
+
+.status-header {
   display: flex;
   align-items: center;
-  padding: 5px 10px;
-  border-radius: 4px;
-  background-color: #f5f5f5;
-  font-size: 12px;
+  margin-bottom: 5px;
 }
 
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 5px;
-}
-
-.status-indicator.online .status-dot {
-  background-color: #4CAF50;
-}
-
-.status-indicator.offline .status-dot {
-  background-color: #F44336;
+.status-icon {
+  margin-right: 8px;
+  font-size: 1rem;
 }
 
 .status-label {
-  margin-right: 5px;
   font-weight: bold;
+  color: #333;
 }
 
-.status-text {
+.status-message {
   color: #666;
+  margin-bottom: 5px;
+}
+
+.status-time {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 5px;
 }
 
 /* Dashboard grid layout */
@@ -150,6 +157,17 @@
   text-align: right;
 }
 
+/* Estilos para tarjetas en estado de carga */
+.air-quality-card.loading,
+.weather-card.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-style: italic;
+}
+
 /* Estilos para la tarjeta del clima */
 .weather-main {
   display: flex;
@@ -191,7 +209,7 @@
 
 /* Estilos para el mapa */
 .map-section {
-  padding: 10px;
+  padding: 20px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -202,24 +220,49 @@
   height: 400px;
   border-radius: 8px;
   overflow: hidden;
+  margin-top: 10px;
 }
 
-.air-quality-map {
+.map {
   height: 100%;
   width: 100%;
+  background-color: #f9f9f9;
+  border-radius: 8px;
 }
 
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255,255,255,0.8);
+.map-fallback {
+  height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  background-color: #f9f9f9;
+  color: #666;
+  text-align: center;
+  padding: 20px;
+}
+
+.map-fallback-note {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 10px;
+  max-width: 300px;
+}
+
+.map-popup {
+  min-width: 200px;
+}
+
+.map-popup h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+.map-popup p {
+  margin: 5px 0;
+  font-size: 14px;
 }
 
 /* Estilos para la sección de tendencias */

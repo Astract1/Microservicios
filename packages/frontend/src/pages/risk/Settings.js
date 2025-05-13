@@ -242,9 +242,12 @@ const Settings = () => {
                 type="range" 
                 min="0" 
                 max="100" 
+                step="1"
                 name="airQualityThreshold" 
                 value={riskSettings.airQualityThreshold}
                 onChange={handleRiskChange}
+                className="range-slider"
+                aria-label="Umbral de calidad del aire"
               />
               <span className="range-value">{riskSettings.airQualityThreshold}</span>
             </div>

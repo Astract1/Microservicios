@@ -2,13 +2,16 @@ import React from 'react';
 import '../../styles/monitoring/Monitoring.css';
 
 const WeatherCard = ({ weather }) => {
-  if (!weather) {
+  // Si no hay datos, mostrar un skeleton loader
+  if (!weather || !weather.data) {
     return <div className="weather-card loading">Cargando datos meteorológicos...</div>;
   }
 
+  const { data } = weather;
+
   // Función para determinar el ícono según la descripción del clima
   const getWeatherIcon = (description) => {
-    if (!description) return '☁️'; // Nublado por defecto
+    if (!description) return '☀️'; // Soleado por defecto
     
     const desc = description.toLowerCase();
     if (desc.includes('lluvia') || desc.includes('rain')) return '🌧️';
@@ -23,6 +26,7 @@ const WeatherCard = ({ weather }) => {
 
   // Determinar ícono para la dirección del viento
   const getWindDirectionIcon = (degrees) => {
+    if (!degrees && degrees !== 0) return '↓'; // Norte por defecto
     if (degrees >= 337.5 || degrees < 22.5) return '↓'; // Norte
     if (degrees >= 22.5 && degrees < 67.5) return '↙️'; // Noreste
     if (degrees >= 67.5 && degrees < 112.5) return '←'; // Este
@@ -36,6 +40,7 @@ const WeatherCard = ({ weather }) => {
 
   // Generar indicador de precipitación
   const getRainIndicator = (precipitation) => {
+    if (precipitation === undefined || precipitation === null) return 'Sin precipitaciones';
     if (precipitation === 0) return 'Sin precipitaciones';
     if (precipitation < 2.5) return 'Lluvia ligera';
     if (precipitation < 7.5) return 'Lluvia moderada';
@@ -43,43 +48,52 @@ const WeatherCard = ({ weather }) => {
     return 'Lluvia intensa';
   };
 
-  const weatherIcon = getWeatherIcon(weather.weatherDescription);
-  const windDirection = getWindDirectionIcon(weather.windDirection);
-  const rainStatus = getRainIndicator(weather.precipitation);
+  // Asegurarnos de tener siempre valores, incluso si son simulados
+  const city = data.city || 'Bogotá';
+  const tempValue = data.temperature !== undefined ? data.temperature : 21;
+  const humidityValue = data.humidity !== undefined ? data.humidity : 70;
+  const windSpeedValue = data.windSpeed !== undefined ? data.windSpeed : 2.5;
+  const windDirectionValue = data.windDirection !== undefined ? data.windDirection : 180;
+  const precipitationValue = data.precipitation !== undefined ? data.precipitation : 0;
+  const weatherDescriptionValue = data.weatherDescription || 'Despejado';
+
+  const weatherIcon = getWeatherIcon(weatherDescriptionValue);
+  const windDirection = getWindDirectionIcon(windDirectionValue);
+  const rainStatus = getRainIndicator(precipitationValue);
 
   return (
     <div className="weather-card">
-      <h3>Clima en {weather.city}</h3>
+      <h3>Clima en {city}</h3>
       <div className="weather-main">
         <div className="weather-icon">{weatherIcon}</div>
-        <div className="temperature">{weather.temperature}°C</div>
+        <div className="temperature">{tempValue}°C</div>
       </div>
       <div className="weather-description">
-        {weather.weatherDescription || 'Información climática'}
+        {weatherDescriptionValue}
       </div>
       <div className="weather-details">
         <div className="detail-item">
           <span className="detail-label">Humedad:</span>
-          <span className="detail-value">{weather.humidity}%</span>
+          <span className="detail-value">{humidityValue}%</span>
         </div>
         <div className="detail-item">
           <span className="detail-label">Viento:</span>
           <span className="detail-value">
-            {weather.windSpeed} m/s {windDirection}
+            {windSpeedValue} m/s {windDirection}
           </span>
         </div>
         <div className="detail-item rain-status">
           <span className="detail-label">Precipitación:</span>
-          <span className="detail-value">{weather.precipitation} mm/h</span>
+          <span className="detail-value">{precipitationValue} mm/h</span>
         </div>
         <div className="rain-indicator">
           {rainStatus}
         </div>
       </div>
-      {weather.source && (
+      {data.source && (
         <div className="data-source">
-          Fuente: {weather.source}
-          {weather.simulated && " (Simulado)"}
+          Fuente: {data.source}
+          {data.simulated && " (Simulado)"}
         </div>
       )}
     </div>

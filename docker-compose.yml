@@ -50,7 +50,7 @@ services:
     build:
       context: ./packages/node-monitoring
       dockerfile: Dockerfile
-    container_name: node-monitoring
+    container_name: microservicios-node-monitoring
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -82,7 +82,7 @@ services:
     build:
       context: ./packages/node-education
       dockerfile: Dockerfile
-    container_name: node-education
+    container_name: microservicios-node-education
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -91,9 +91,9 @@ services:
       - DB_USER=root
       - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
       - DB_DATABASE=monitoreo_ambiental
-      - MONITORING_API_URL=http://node-monitoring:3001/api
+      - MONITORING_API_URL=http://microservicios-node-monitoring:3001/api
     ports:
-      - "3002:3002"
+      - "3022:3002"
     networks:
       - microservicios-net
     depends_on:
@@ -113,14 +113,14 @@ services:
     build:
       context: ./packages/dotnet-risk
       dockerfile: Dockerfile
-    container_name: dotnet-risk
+    container_name: microservicios-dotnet-risk
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - DATABASE_CONNECTION=Data Source=/app/Data/RiskService.db
       - WEATHER_API_KEY=${WEATHER_API_KEY:-sample_key}
       - ASPNETCORE_URLS=http://+:80
-      - MONITORING_API_URL=http://node-monitoring:3001/api
+      - MONITORING_API_URL=http://microservicios-node-monitoring:3001/api
     volumes:
       - risk_data:/app/Data
     ports:
@@ -142,17 +142,17 @@ services:
     build:
       context: ./packages/dotnet-prevention
       dockerfile: Dockerfile
-    container_name: dotnet-prevention
+    container_name: microservicios-dotnet-prevention
     restart: unless-stopped
     ports:
       - "5001:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - DATABASE_CONNECTION=Data Source=/app/Data/PreventionService.db
-      - DOTNET_RISK_API_URL=http://dotnet-risk
+      - DOTNET_RISK_API_URL=http://microservicios-dotnet-risk
       - WEATHER_API_KEY=${WEATHER_API_KEY:-sample_key}
       - ASPNETCORE_URLS=http://+:80
-      - MONITORING_API_URL=http://node-monitoring:3001/api
+      - MONITORING_API_URL=http://microservicios-node-monitoring:3001/api
     volumes:
       - prevention_data:/app/Data
     networks:
@@ -177,14 +177,14 @@ services:
       context: ./packages/frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_NODE_MONITORING_URL=http://node-monitoring:3001
+        - REACT_APP_NODE_MONITORING_URL=http://microservicios-node-monitoring:3001
         - REACT_APP_API_URL=/api
         - REACT_APP_WEATHER_API_URL=/api/weather
         - REACT_APP_EDUCATION_API_URL=/education-api
         - REACT_APP_RISK_API_URL=/risk-api
         - REACT_APP_PREVENTION_API_URL=/prevention-api
         - REACT_APP_MAP_PROVIDER=openstreetmap
-    container_name: frontend
+    container_name: microservicios-frontend
     restart: unless-stopped
     ports:
       - "8000:80"
@@ -213,7 +213,7 @@ services:
   # API Gateway con Nginx
   api-gateway:
     image: nginx:alpine
-    container_name: api-gateway
+    container_name: frontend
     restart: unless-stopped
     ports:
       - "80:80"

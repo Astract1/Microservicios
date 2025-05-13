@@ -5,5 +5,13 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.21.2"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon --watch . --inspect=0.0.0.0:9229 index.js",
+    "hot": "nodemon --watch . --ext js,json,env --delay 0.25 --inspect=0.0.0.0:9229 index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

@@ -17,6 +17,7 @@ import StatusIndicator from '../../components/monitoring/StatusIndicator';
 // Detectamos si la URL base ya incluye /api para evitar duplicación
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 const BASE_URL = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
+const DEFAULT_CITY = process.env.REACT_APP_DEFAULT_CITY || 'Bogotá';
 
 const Monitoring = () => {
   // Estados para almacenar los datos
@@ -39,11 +40,40 @@ const Monitoring = () => {
       setLoading(true);
       // Usamos BASE_URL sin añadir /api nuevamente
       const response = await axios.get(`${BASE_URL}/dashboard`);
+      console.log('Datos recibidos:', response.data); // Para depuración
       setDashboardData(response.data);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
       console.error('Error al obtener datos del dashboard:', err);
+      // En caso de error, establecer datos vacíos pero con formato consistente
+      setDashboardData({
+        airQuality: {
+          error: true,
+          errorMessage: err.message,
+          data: {
+            city: DEFAULT_CITY || 'No disponible',
+            aqi: undefined,
+            temperature: undefined,
+            humidity: undefined,
+            timestamp: new Date(),
+            source: 'Error',
+            error: err.message
+          }
+        },
+        weather: {
+          error: true,
+          errorMessage: err.message,
+          data: {
+            temperature: undefined,
+            humidity: undefined,
+            conditions: undefined,
+            source: 'Error',
+            error: err.message
+          }
+        },
+        timestamp: new Date().toISOString()
+      });
       setError('Error al cargar los datos del dashboard. Por favor, intente nuevamente más tarde.');
     } finally {
       setLoading(false);
@@ -120,6 +150,8 @@ const Monitoring = () => {
               (apiStatus.apis.iqair.status === 'success' ? 'Conectado' : 'Desconectado') : 
               'Verificando estado...'
             }
+            lastUpdated={apiStatus && apiStatus.apis && apiStatus.apis.iqair ? 
+              apiStatus.apis.iqair.lastUpdate : null}
           />
           <StatusIndicator 
             status={apiStatus && apiStatus.apis ? 
@@ -131,6 +163,8 @@ const Monitoring = () => {
               (apiStatus.apis.openweathermap.status === 'success' ? 'Conectado' : 'Desconectado') : 
               'Verificando estado...'
             }
+            lastUpdated={apiStatus && apiStatus.apis && apiStatus.apis.openweathermap ? 
+              apiStatus.apis.openweathermap.lastUpdate : null}
           />
           <StatusIndicator 
             status={apiStatus && apiStatus.db ? 
@@ -142,6 +176,8 @@ const Monitoring = () => {
               (apiStatus.db.status === 'connected' ? 'Conectado' : 'Desconectado') : 
               'Verificando estado...'
             }
+            lastUpdated={apiStatus && apiStatus.db ? 
+              apiStatus.db.lastUpdate : null}
           />
         </div>
       </header>
@@ -160,24 +196,32 @@ const Monitoring = () => {
         {/* Segunda fila: Mapa interactivo */}
         <section className="map-section">
           <h2>Mapa de Calidad del Aire</h2>
-          {dashboardData && <MapView airQualityData={dashboardData.airQuality} />}
+          {dashboardData && <MapView 
+            airQualityData={dashboardData.airQuality} 
+            center={dashboardData.airQuality && dashboardData.airQuality.data && dashboardData.airQuality.data.coordinates ? 
+              [dashboardData.airQuality.data.coordinates.lat, dashboardData.airQuality.data.coordinates.lon] : 
+              null
+            }
+          />}
         </section>
 
         {/* Tercera fila: Gráficos de tendencia */}
         <section className="trends-section">
           <h2>Tendencias Recientes</h2>
           <div className="charts-container">
-            {dashboardData && dashboardData.airQuality && (
+            {dashboardData && dashboardData.airQuality && dashboardData.airQuality.data && (
               <div className="chart-wrapper">
                 <h3>Índice de Calidad del Aire (últimas 24h)</h3>
                 <Plot
                   data={[
                     {
                       x: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()],
-                      y: [dashboardData.airQuality.aqi - Math.random() * 10, dashboardData.airQuality.aqi],
+                      y: dashboardData.airQuality.data.aqi !== undefined ? 
+                        [dashboardData.airQuality.data.aqi - Math.random() * 10, dashboardData.airQuality.data.aqi] : 
+                        [50, 50], // Valores por defecto si no hay datos reales
                       type: 'scatter',
                       mode: 'lines+markers',
-                      marker: { color: getAQIColor(dashboardData.airQuality.aqi) },
+                      marker: { color: getAQIColor(dashboardData.airQuality.data.aqi) },
                       line: { shape: 'spline', smoothing: 1.3 }
                     }
                   ]}
@@ -194,14 +238,16 @@ const Monitoring = () => {
               </div>
             )}
             
-            {dashboardData && dashboardData.weather && (
+            {dashboardData && dashboardData.weather && dashboardData.weather.data && (
               <div className="chart-wrapper">
                 <h3>Temperatura y Humedad (últimas 24h)</h3>
                 <Plot
                   data={[
                     {
                       x: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()],
-                      y: [dashboardData.weather.temperature - 2, dashboardData.weather.temperature],
+                      y: dashboardData.weather.data.temperature !== undefined ? 
+                        [dashboardData.weather.data.temperature - 2, dashboardData.weather.data.temperature] : 
+                        [20, 22], // Valores por defecto si no hay datos reales
                       type: 'scatter',
                       mode: 'lines+markers',
                       name: 'Temperatura (°C)',
@@ -210,7 +256,9 @@ const Monitoring = () => {
                     },
                     {
                       x: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()],
-                      y: [dashboardData.weather.humidity - 5, dashboardData.weather.humidity],
+                      y: dashboardData.weather.data.humidity !== undefined ? 
+                        [dashboardData.weather.data.humidity - 5, dashboardData.weather.data.humidity] : 
+                        [60, 65], // Valores por defecto si no hay datos reales
                       type: 'scatter',
                       mode: 'lines+markers',
                       name: 'Humedad (%)',
@@ -257,6 +305,7 @@ const Monitoring = () => {
 
 // Función para determinar el color según el índice de calidad del aire
 const getAQIColor = (aqi) => {
+  if (!aqi && aqi !== 0) return '#00E400'; // Verde por defecto
   if (aqi <= 50) return '#00E400'; // Bueno - Verde
   if (aqi <= 100) return '#FFFF00'; // Moderado - Amarillo
   if (aqi <= 150) return '#FF7E00'; // Insalubre para grupos sensibles - Naranja

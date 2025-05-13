@@ -57,10 +57,11 @@ const HistoricalData = () => {
     };
     
     fetchHistoricalData();
-  }, [timeRange]);
+  }, [timeRange, API_BASE_URL]);
 
   // Función para cambiar el rango de tiempo
   const handleTimeRangeChange = (days) => {
+    if (days === timeRange) return; // Evitar recargas innecesarias si se selecciona el mismo valor
     setTimeRange(days);
   };
 
@@ -203,20 +204,33 @@ const HistoricalData = () => {
         <section className="chart-section">
           <h2>Calidad del Aire</h2>
           <div className="chart-container">
-            <Plot
-              data={prepareAirQualityData()}
-              layout={{
-                autosize: true,
-                height: 400,
-                margin: { l: 50, r: 20, t: 30, b: 50 },
-                title: 'Evolución de la Calidad del Aire',
-                xaxis: { title: 'Fecha' },
-                yaxis: { title: 'Valores' },
-                legend: { orientation: 'h', y: -0.2 }
-              }}
-              config={{ responsive: true }}
-              className="plotly-chart"
-            />
+            {airQualityHistory && airQualityHistory.data && airQualityHistory.data.length > 0 ? (
+              <Plot
+                data={prepareAirQualityData()}
+                layout={{
+                  autosize: true,
+                  height: 400,
+                  margin: { l: 50, r: 20, t: 30, b: 50 },
+                  title: 'Evolución de la Calidad del Aire',
+                  xaxis: { title: 'Fecha' },
+                  yaxis: { title: 'Valores' },
+                  legend: { orientation: 'h', y: -0.2 }
+                }}
+                config={{ 
+                  responsive: true,
+                  displayModeBar: true,
+                  displaylogo: false,
+                  modeBarButtonsToRemove: ['sendDataToCloud', 'select2d', 'lasso2d']
+                }}
+                className="plotly-chart"
+                useResizeHandler={true}
+                style={{ width: '100%', height: '400px' }}
+              />
+            ) : (
+              <div className="no-data-message">
+                <p>No hay datos disponibles para el período seleccionado</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -224,20 +238,33 @@ const HistoricalData = () => {
         <section className="chart-section">
           <h2>Temperatura y Humedad</h2>
           <div className="chart-container">
-            <Plot
-              data={prepareWeatherData()}
-              layout={{
-                autosize: true,
-                height: 400,
-                margin: { l: 50, r: 20, t: 30, b: 50 },
-                title: 'Evolución de Temperatura y Humedad',
-                xaxis: { title: 'Fecha' },
-                yaxis: { title: 'Valores' },
-                legend: { orientation: 'h', y: -0.2 }
-              }}
-              config={{ responsive: true }}
-              className="plotly-chart"
-            />
+            {weatherHistory && weatherHistory.data && weatherHistory.data.length > 0 ? (
+              <Plot
+                data={prepareWeatherData()}
+                layout={{
+                  autosize: true,
+                  height: 400,
+                  margin: { l: 50, r: 20, t: 30, b: 50 },
+                  title: 'Evolución de Temperatura y Humedad',
+                  xaxis: { title: 'Fecha' },
+                  yaxis: { title: 'Valores' },
+                  legend: { orientation: 'h', y: -0.2 }
+                }}
+                config={{ 
+                  responsive: true,
+                  displayModeBar: true,
+                  displaylogo: false,
+                  modeBarButtonsToRemove: ['sendDataToCloud', 'select2d', 'lasso2d']
+                }}
+                className="plotly-chart"
+                useResizeHandler={true}
+                style={{ width: '100%', height: '400px' }}
+              />
+            ) : (
+              <div className="no-data-message">
+                <p>No hay datos disponibles para el período seleccionado</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -245,19 +272,32 @@ const HistoricalData = () => {
         <section className="chart-section">
           <h2>Precipitaciones</h2>
           <div className="chart-container">
-            <Plot
-              data={prepareRainfallData()}
-              layout={{
-                autosize: true,
-                height: 400,
-                margin: { l: 50, r: 20, t: 30, b: 50 },
-                title: 'Historial de Precipitaciones',
-                xaxis: { title: 'Fecha' },
-                yaxis: { title: 'Precipitación (mm)' }
-              }}
-              config={{ responsive: true }}
-              className="plotly-chart"
-            />
+            {rainfallHistory && rainfallHistory.data && rainfallHistory.data.length > 0 ? (
+              <Plot
+                data={prepareRainfallData()}
+                layout={{
+                  autosize: true,
+                  height: 400,
+                  margin: { l: 50, r: 20, t: 30, b: 50 },
+                  title: 'Historial de Precipitaciones',
+                  xaxis: { title: 'Fecha' },
+                  yaxis: { title: 'Precipitación (mm)' }
+                }}
+                config={{ 
+                  responsive: true,
+                  displayModeBar: true,
+                  displaylogo: false,
+                  modeBarButtonsToRemove: ['sendDataToCloud', 'select2d', 'lasso2d']
+                }}
+                className="plotly-chart"
+                useResizeHandler={true}
+                style={{ width: '100%', height: '400px' }}
+              />
+            ) : (
+              <div className="no-data-message">
+                <p>No hay datos disponibles para el período seleccionado</p>
+              </div>
+            )}
           </div>
         </section>
       </div>

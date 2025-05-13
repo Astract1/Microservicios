@@ -2,45 +2,63 @@ import React, { useEffect, useRef } from 'react';
 import '../../styles/monitoring/Monitoring.css';
 
 const MapView = ({ 
-  center = [40.416775, -3.703790], // Madrid por defecto
+  airQualityData,
+  center,
   zoom = 13,
-  markers = [],
   height = '400px'
 }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
-  // Datos de marcadores de ejemplo si no se proporcionan
-  const defaultMarkers = [
-    { id: 1, position: [40.416775, -3.703790], title: 'Estación Centro', type: 'air' },
-    { id: 2, position: [40.426775, -3.713790], title: 'Estación Norte', type: 'weather' },
-    { id: 3, position: [40.406775, -3.693790], title: 'Estación Sur', type: 'alert' }
-  ];
-
-  const displayMarkers = markers.length > 0 ? markers : defaultMarkers;
+  // Obtener los datos de la nueva estructura
+  const data = airQualityData?.data || {};
+  
+  // Determinar el centro del mapa basado en los datos de calidad del aire o usar un valor predeterminado
+  const mapCenter = center || (data && data.coordinates ? 
+    [data.coordinates.lat, data.coordinates.lon] : 
+    [4.710989, -74.072092]); // Bogotá por defecto
 
   useEffect(() => {
-    // Verificar si Leaflet está disponible globalmente (asumiendo que se carga desde CDN)
+    // Verificar si Leaflet está disponible globalmente
     if (window.L && mapRef.current && !mapInstanceRef.current) {
       // Inicializar el mapa
-      mapInstanceRef.current = window.L.map(mapRef.current).setView(center, zoom);
+      mapInstanceRef.current = window.L.map(mapRef.current).setView(mapCenter, zoom);
 
       // Añadir capa de mapa base (OpenStreetMap)
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(mapInstanceRef.current);
 
-      // Añadir marcadores
-      displayMarkers.forEach(marker => {
-        const markerIcon = getMarkerIcon(marker.type);
+      // Siempre mostrar un marcador con datos, ya sean reales o simulados
+      if (data && data.coordinates) {
+        // Asegurarnos de tener valores simulados si no hay datos reales
+        const aqiValue = data.aqi !== undefined ? data.aqi : 45;
+        const cityValue = data.city || 'Bogotá';
+        const tempValue = data.temperature !== undefined ? data.temperature : 20;
+        const humidityValue = data.humidity !== undefined ? data.humidity : 65;
+        const aqiColor = getAQIColor(aqiValue);
         
-        window.L.marker(marker.position, { icon: markerIcon })
+        // Crear icono personalizado con color basado en AQI
+        const markerIcon = window.L.divIcon({
+          className: 'custom-div-icon',
+          html: `<div style="background-color:${aqiColor}; width:30px; height:30px; border-radius:50%; border:2px solid white; display:flex; justify-content:center; align-items:center; color:white; font-weight:bold;">${aqiValue}</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
+        });
+        
+        // Añadir marcador con popup
+        window.L.marker(mapCenter, { icon: markerIcon })
           .addTo(mapInstanceRef.current)
-          .bindPopup(marker.title);
-      });
-    } else {
-      // Mostrar un mensaje si Leaflet no está disponible
-      console.warn('Leaflet no está disponible. Asegúrate de incluir la biblioteca en tu proyecto.');
+          .bindPopup(`
+            <div class="map-popup">
+              <h3>Calidad del Aire en ${cityValue}</h3>
+              <p><strong>AQI:</strong> ${aqiValue} (${getAQICategory(aqiValue)})</p>
+              <p><strong>Temperatura:</strong> ${tempValue}°C</p>
+              <p><strong>Humedad:</strong> ${humidityValue}%</p>
+              ${airQualityData.simulated ? "<p><em>Datos simulados</em></p>" : ""}
+            </div>
+          `);
+      }
     }
 
     // Función de limpieza
@@ -50,44 +68,34 @@ const MapView = ({
         mapInstanceRef.current = null;
       }
     };
-  }, [center, zoom, displayMarkers]);
+  }, [mapCenter, zoom, airQualityData, data]);
 
-  // Función para determinar el icono basado en el tipo de marcador
-  const getMarkerIcon = (type) => {
-    // Esta función depende de Leaflet, así que solo la usaremos si está disponible
-    if (!window.L) return null;
-
-    const iconUrl = getIconUrlByType(type);
-    
-    // Utilizar un icono personalizado si está disponible Leaflet
-    return window.L.icon({
-      iconUrl,
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34]
-    });
+  // Función para obtener el color basado en AQI
+  const getAQIColor = (aqi) => {
+    if (!aqi && aqi !== 0) return '#999'; // Gris para datos no disponibles
+    if (aqi <= 50) return '#00E400'; // Bueno - Verde
+    if (aqi <= 100) return '#FFFF00'; // Moderado - Amarillo
+    if (aqi <= 150) return '#FF7E00'; // Insalubre para grupos sensibles - Naranja
+    if (aqi <= 200) return '#FF0000'; // Insalubre - Rojo
+    if (aqi <= 300) return '#99004C'; // Muy insalubre - Púrpura
+    return '#7E0023'; // Peligroso - Marrón
   };
 
-  // Función para obtener la URL del icono basado en el tipo
-  const getIconUrlByType = (type) => {
-    // En una implementación real, estas serían rutas a imágenes de iconos reales
-    // Para este ejemplo, usaremos los iconos por defecto de Leaflet
-    switch (type) {
-      case 'air':
-        return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png';
-      case 'weather':
-        return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
-      case 'alert':
-        return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
-      default:
-        return 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png';
-    }
+  // Función para obtener la categoría de calidad del aire
+  const getAQICategory = (aqi) => {
+    if (!aqi && aqi !== 0) return 'No disponible';
+    if (aqi <= 50) return 'Buena';
+    if (aqi <= 100) return 'Moderada';
+    if (aqi <= 150) return 'Insalubre para grupos sensibles';
+    if (aqi <= 200) return 'Insalubre';
+    if (aqi <= 300) return 'Muy insalubre';
+    return 'Peligrosa';
   };
 
   return (
     <div className="map-container" style={{ height }}>
       {window.L ? (
-        <div ref={mapRef} className="map"></div>
+        <div ref={mapRef} className="map" style={{ height: '100%' }}></div>
       ) : (
         <div className="map-fallback">
           <p>Cargando mapa...</p>
