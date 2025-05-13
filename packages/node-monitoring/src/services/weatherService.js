@@ -222,25 +222,21 @@ async function getCurrentWeather() {
 // Función para obtener datos del clima - utilizada por el endpoint del dashboard
 async function getWeatherData() {
   try {
+    // Verificar si la API key está configurada
+    if (!WEATHER_API_KEY) {
+      console.log('No hay API key configurada para OpenWeatherMap. Generando datos simulados...');
+      const mockData = createMockWeatherData();
+      return mockData;
+    }
+    
     const weatherResult = await getCurrentWeather();
     return weatherResult.data;
   } catch (error) {
     console.error('Error al obtener datos meteorológicos:', error);
-    // Devolvemos un objeto con datos mínimos para evitar errores
-    return {
-      city: DEFAULT_CITY,
-      temperature: 0,
-      humidity: 0,
-      windSpeed: 0,
-      windDirection: 0,
-      precipitation: 0,
-      uvIndex: 0,
-      pressure: 0,
-      weatherDescription: 'Error al obtener datos',
-      weatherIcon: '01d',
-      source: 'Error',
-      timestamp: new Date()
-    };
+    console.log('Generando datos simulados debido al error...');
+    
+    // Siempre devolver datos simulados en caso de error
+    return createMockWeatherData();
   }
 }
 

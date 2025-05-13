@@ -2,12 +2,16 @@ import React from 'react';
 import '../../styles/monitoring/Monitoring.css';
 
 const WeatherCard = ({ weather }) => {
+  // Comprobamos si tenemos datos en cualquiera de los formatos posibles
+  const noData = !weather || ((!weather.data) && (!weather.city && !weather.temperature && !weather.humidity));
+
   // Si no hay datos, mostrar un skeleton loader
-  if (!weather || !weather.data) {
+  if (noData) {
     return <div className="weather-card loading">Cargando datos meteorológicos...</div>;
   }
 
-  const { data } = weather;
+  // Determinar si los datos están en weather.data o directamente en weather
+  const data = weather.data || weather;
 
   // Función para determinar el ícono según la descripción del clima
   const getWeatherIcon = (description) => {
