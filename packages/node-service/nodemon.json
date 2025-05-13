@@ -1,0 +1,17 @@
+{
+  "verbose": true,
+  "ignore": ["node_modules", "*.test.js", "test/*", "build/*", "logs/*"],
+  "watch": ["./"],
+  "ext": "js,json,env",
+  "delay": "250",
+  "execMap": {
+    "js": "node --inspect=0.0.0.0:9229"
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "DEBUG": "express:*,service:*"
+  },
+  "events": {
+    "restart": "echo \"[Node Service] Reiniciando servidor...\" && date"
+  }
+} 

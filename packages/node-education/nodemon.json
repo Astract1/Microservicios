@@ -1,0 +1,17 @@
+{
+  "verbose": true,
+  "ignore": ["node_modules", "*.test.js", "test/*", "build/*", "logs/*"],
+  "watch": ["src/"],
+  "ext": "js,json,env",
+  "delay": "250",
+  "execMap": {
+    "js": "node --inspect=0.0.0.0:9229"
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "DEBUG": "express:*,mysql:*,education:*"
+  },
+  "events": {
+    "restart": "echo \"[Education Service] Reiniciando servidor...\" && date"
+  }
+} 
