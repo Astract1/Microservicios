@@ -382,6 +382,26 @@ app.get('/api/stats/content', async (req, res) => {
   }
 });
 
+// Nuevo endpoint para estadísticas de contenido educativo por categoría
+app.get('/api/education/content-stats', async (req, res) => {
+  try {
+    const stats = await statsService.getContentStatsByCategory();
+    
+    res.json({
+      success: true,
+      data: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error al obtener estadísticas de contenido por categoría:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener estadísticas de contenido por categoría',
+      error: error.message
+    });
+  }
+});
+
 // === INICIAR SERVIDOR ===
 
 app.listen(port, () => {  

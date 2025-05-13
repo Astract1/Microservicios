@@ -310,12 +310,16 @@ function Start-Frontend {
     $job = Start-Job -Name "Frontend" -ScriptBlock {
         param($dir)
         Set-Location $dir
-        $env:PORT = 3000
+        
+        # Variables de entorno explícitas para React en Windows
         $env:FAST_REFRESH = "true"
         $env:CHOKIDAR_USEPOLLING = "true"
+        $env:CHOKIDAR_INTERVAL = "1000"
         $env:BROWSER = "none"
+        $env:PORT = "3000"
+        $env:WDS_SOCKET_PORT = "0"
         
-        # Ejecutar el frontend
+        # Ejecutar con npm directamente para evitar problemas con PowerShell
         npm run start:hot
     } -ArgumentList $PWD.Path
     
