@@ -1,36 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj": {}
+    "/app/PreventionService/PreventionService.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj": {
+    "/app/PreventionService/PreventionService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
+        "projectUniqueName": "/app/PreventionService/PreventionService.csproj",
         "projectName": "PreventionService",
-        "projectPath": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\PreventionService.csproj",
-        "packagesPath": "C:\\Users\\Juan Jimenez\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Juan Jimenez\\Desktop\\Microservicios\\packages\\dotnet-prevention\\PreventionService\\obj\\",
+        "projectPath": "/app/PreventionService/PreventionService.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/PreventionService/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Juan Jimenez\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/root/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net9.0"
+          "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net9.0": {
-            "targetAlias": "net9.0",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -43,24 +37,23 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
+        }
       },
       "frameworks": {
-        "net9.0": {
-          "targetAlias": "net9.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
@@ -82,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.202/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.409/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

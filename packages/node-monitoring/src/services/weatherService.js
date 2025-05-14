@@ -14,6 +14,16 @@ const DEFAULT_CITY = process.env.DEFAULT_CITY || 'Bogota';
 const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LAT || '4.6097');
 const DEFAULT_LON = parseFloat(process.env.DEFAULT_LON || '-74.0817');
 
+// Estado de la API para diagnósticos
+let apiStatus = {
+  status: 'unknown',
+  lastSuccess: null,
+  lastError: null,
+  errorCount: 0,
+  message: 'Sin inicializar',
+  lastUpdate: new Date().toISOString()
+};
+
 // Función auxiliar para generar números aleatorios en un rango para datos de simulación
 function getRandomForSimulation(min, max) {
   // Seguro para datos de simulación, no se usa para fines de seguridad
@@ -57,20 +67,60 @@ async function fetchWeatherData() {
     throw new Error('API key no configurada. Configure WEATHER_API_KEY en las variables de entorno.');
   }
   
-  return await axios.get(`${WEATHER_API_URL}/weather`, {
-    params: {
-      lat: DEFAULT_LAT,
-      lon: DEFAULT_LON,
-      appid: WEATHER_API_KEY,
-      units: 'metric'
-    }
-  });
+  // Crear controller para poder cancelar la petición si tarda demasiado
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  
+  try {
+    const response = await axios.get(`${WEATHER_API_URL}/weather`, {
+      params: {
+        lat: DEFAULT_LAT,
+        lon: DEFAULT_LON,
+        appid: WEATHER_API_KEY,
+        units: 'metric'
+      },
+      signal: controller.signal,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+    
+    // Actualizar estado de la API
+    apiStatus = {
+      status: 'success',
+      lastSuccess: new Date().toISOString(),
+      lastError: apiStatus.lastError,
+      errorCount: 0,
+      message: 'API funcionando correctamente',
+      lastUpdate: new Date().toISOString()
+    };
+    
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    // Actualizar estado de la API en caso de error
+    apiStatus = {
+      status: 'error',
+      lastSuccess: apiStatus.lastSuccess,
+      lastError: new Date().toISOString(),
+      errorCount: apiStatus.errorCount + 1,
+      message: error.message,
+      lastUpdate: new Date().toISOString()
+    };
+    
+    clearTimeout(timeoutId);
+    throw error;
+  }
 }
 
 async function fetchRainData() {
   let rainData = 0;
   
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
     const rainResponse = await axios.get(`${WEATHER_API_URL}/forecast`, {
       params: {
         lat: DEFAULT_LAT,
@@ -78,8 +128,11 @@ async function fetchRainData() {
         appid: WEATHER_API_KEY,
         units: 'metric',
         cnt: 1 // Solo necesitamos el pronóstico más reciente
-      }
+      },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (rainResponse?.data?.list?.length > 0) {
       if (rainResponse.data.list[0]?.rain?.['3h']) {
@@ -100,6 +153,9 @@ async function fetchRainData() {
 
 async function fetchFallbackRainData(originalError) {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const rainFallback = await axios.get(`${WEATHER_API_URL}/forecast`, {
       params: {
         lat: DEFAULT_LAT,
@@ -107,8 +163,11 @@ async function fetchFallbackRainData(originalError) {
         appid: WEATHER_API_KEY,
         units: 'metric',
         cnt: 1
-      }
+      },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (rainFallback?.data?.list?.length > 0) {
       return rainFallback.data.list[0]?.rain?.['3h'] / 3 || 0;
@@ -200,22 +259,24 @@ async function getCurrentWeather() {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error en getCurrentWeather:');
     logWeatherError(error);
     
-    // Si estamos en modo desarrollo o prueba, devolver datos simulados
-    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-      console.log('Generando datos meteorológicos simulados para desarrollo');
-      const mockData = createMockWeatherData();
-      
-      return {
-        data: mockData,
-        simulated: true,
-        timestamp: new Date().toISOString()
-      };
+    console.log('Usando datos simulados debido al error de conexión...');
+    const mockData = createMockWeatherData();
+    
+    try {
+      await saveWeatherData(mockData);
+      console.log('Datos simulados guardados en la base de datos');
+    } catch (dbError) {
+      console.warn('No se pudieron guardar los datos simulados en la BD:', dbError.message);
     }
     
-    throw error;
+    return {
+      data: mockData,
+      error: error.message,
+      errorDetail: error.response?.data || error.request || error.message,
+      timestamp: new Date().toISOString()
+    };
   }
 }
 
@@ -459,11 +520,18 @@ function evaluateWeatherAlert(weatherData) {
   return alerts;
 }
 
+// Función para obtener el estado actual de la API
+function getApiStatus() {
+  return apiStatus;
+}
+
+// Exportar todas las funciones
 module.exports = {
   getCurrentWeather,
   getWeatherData,
   getWeatherForecast,
   getRainfallHistory,
   getHistoricalWeatherData,
-  evaluateWeatherAlert
+  evaluateWeatherAlert,
+  getApiStatus // Exportar la nueva función
 };

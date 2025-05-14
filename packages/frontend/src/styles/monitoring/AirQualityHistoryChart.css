@@ -1,0 +1,152 @@
+.air-quality-history-chart {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.air-quality-history-chart:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+.air-quality-history-chart h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 10px;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.tab-button {
+  padding: 8px 15px;
+  background-color: #f5f7fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background-color: #ecf0f1;
+}
+
+.tab-button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+  box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+}
+
+.plotly-chart {
+  width: 100%;
+  max-height: 300px;
+  transition: all 0.3s ease;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.chart-legend:hover {
+  background-color: #f2f2f2;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.legend-item:hover {
+  transform: translateY(-2px);
+}
+
+.color-box {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.air-quality-history-loading,
+.air-quality-history-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.air-quality-history-error button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.air-quality-history-error button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.retry-button {
+  padding: 10px 20px !important;
+  font-weight: bold !important;
+  font-size: 1rem !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.retry-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+@media (max-width: 768px) {
+  .chart-legend {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .legend-item {
+    margin: 3px 0;
+  }
+  
+  .tab-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+} 

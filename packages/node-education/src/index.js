@@ -382,21 +382,20 @@ app.get('/api/stats/content', async (req, res) => {
   }
 });
 
-// Nuevo endpoint para estadísticas de contenido educativo por categoría
+// Endpoint para obtener estadísticas de contenido por categoría
 app.get('/api/education/content-stats', async (req, res) => {
   try {
     const stats = await statsService.getContentStatsByCategory();
-    
     res.json({
       success: true,
       data: stats,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error al obtener estadísticas de contenido por categoría:', error);
+    console.error('Error al obtener estadísticas de contenido:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al obtener estadísticas de contenido por categoría',
+      message: 'Error al obtener estadísticas de contenido educativo',
       error: error.message
     });
   }

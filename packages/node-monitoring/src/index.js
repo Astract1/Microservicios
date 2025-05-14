@@ -83,89 +83,46 @@ app.use('/api/health', healthRoutes);
  */
 // Endpoint para verificar el estado de las APIs
 app.get('/api/diagnostics', async (req, res) => {
-  const results = {
-    timestamp: new Date().toISOString(),
-    apis: {},
-    environment: {
-      NODE_ENV: process.env.NODE_ENV,
-      DEFAULT_CITY: process.env.DEFAULT_CITY,
-      IQAIR_API_KEY: process.env.IQAIR_API_KEY ? '****' + process.env.IQAIR_API_KEY.slice(-4) : 'No definida',
-      WEATHER_API_KEY: process.env.WEATHER_API_KEY ? '****' + process.env.WEATHER_API_KEY.slice(-4) : 'No definida',
-      IQAIR_BASE_URL: process.env.IQAIR_BASE_URL || 'http://api.airvisual.com/v2',
-      WEATHER_API_URL: process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5'
+  try {
+    // Verificar conexión a la base de datos
+    let dbStatus = { status: 'unknown', message: 'No verificado' };
+    try {
+      const connection = await pool.getConnection();
+      await connection.ping();
+      connection.release();
+      dbStatus = { 
+        status: 'connected', 
+        message: 'Conexión establecida correctamente',
+        lastUpdate: new Date().toISOString()
+      };
+    } catch (dbError) {
+      dbStatus = { 
+        status: 'error', 
+        message: dbError.message,
+        lastUpdate: new Date().toISOString()
+      };
     }
-  };
-  
-  // Verificar IQAir
-  try {
-    const iqairStart = Date.now();
-    const iqairResponse = await axios.get(`${process.env.IQAIR_BASE_URL || 'http://api.airvisual.com/v2'}/countries`, {
-      params: { key: process.env.IQAIR_API_KEY },
-      timeout: 5000
-    });
-    results.apis.iqair = {
-      status: 'success',
-      responseTime: Date.now() - iqairStart,
-      statusCode: iqairResponse.status,
-      dataAvailable: !!iqairResponse.data
-    };
-  } catch (error) {
-    results.apis.iqair = {
-      status: 'error',
-      message: error.message,
-      code: error.response?.status || 'unknown',
-      detail: error.response?.data || {}
-    };
-  }
-  
-  // Verificar OpenWeatherMap
-  try {
-    const owmStart = Date.now();
-    const owmResponse = await axios.get(`${process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5'}/weather`, {
-      params: {
-        lat: process.env.DEFAULT_LAT || '4.6097',
-        lon: process.env.DEFAULT_LON || '-74.0817',
-        appid: process.env.WEATHER_API_KEY,
-        units: 'metric'
-      },
-      timeout: 5000
-    });
-    results.apis.openweathermap = {
-      status: 'success',
-      responseTime: Date.now() - owmStart,
-      statusCode: owmResponse.status,
-      dataAvailable: !!owmResponse.data
-    };
-  } catch (error) {
-    results.apis.openweathermap = {
-      status: 'error',
-      message: error.message,
-      code: error.response?.status || 'unknown',
-      detail: error.response?.data || {}
-    };
-  }
-  
-  // Verificar base de datos
-  try {
-    const dbStart = Date.now();
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT COUNT(*) as count FROM air_quality_measurements');
-    connection.release();
-    results.db = {
-      status: 'connected',
-      responseTime: Date.now() - dbStart,
-      records: {
-        air_quality_measurements: rows[0].count
+
+    // Obtener estado de las APIs externas
+    const weatherApiStatus = weatherService.getApiStatus();
+    const airQualityApiStatus = airQualityService.getApiStatus();
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      db: dbStatus,
+      apis: {
+        openweathermap: weatherApiStatus,
+        iqair: airQualityApiStatus
       }
-    };
+    });
   } catch (error) {
-    results.db = {
+    console.error('Error en endpoint de diagnóstico:', error);
+    res.status(500).json({
       status: 'error',
-      message: error.message
-    };
+      message: 'Error al obtener diagnóstico',
+      error: error.message
+    });
   }
-  
-  res.json(results);
 });
 
 // Endpoint para probar la conexión a MariaDB
@@ -429,6 +386,75 @@ app.put('/api/alerts/thresholds/:parameter', async (req, res) => {
 
 /**
  * @swagger
+ * /api/dashboard/historical:
+ *   get:
+ *     tags:
+ *       - Monitoreo
+ *     summary: Obtener datos históricos para el dashboard
+ *     description: Retorna datos históricos de calidad del aire y clima para gráficas
+ *     parameters:
+ *       - in: query
+ *         name: days
+ *         schema:
+ *           type: integer
+ *         description: Número de días de historia a obtener (por defecto 7)
+ *     responses:
+ *       200:
+ *         description: Operación exitosa
+ */
+app.get('/api/dashboard/historical', async (req, res) => {
+  try {
+    const days = req.query.days ? parseInt(req.query.days) : 7;
+    
+    // Obtener datos históricos de calidad del aire
+    let airQualityHistory;
+    try {
+      airQualityHistory = await airQualityService.getHistoricalData(days);
+    } catch (error) {
+      console.error('Error al obtener datos históricos de calidad del aire:', error);
+      airQualityHistory = { 
+        error: true, 
+        errorMessage: error.message,
+        data: [],
+        simulated: true,
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    // Obtener datos históricos meteorológicos
+    let weatherHistory;
+    try {
+      weatherHistory = await weatherService.getHistoricalWeatherData(days);
+    } catch (error) {
+      console.error('Error al obtener datos históricos meteorológicos:', error);
+      weatherHistory = { 
+        error: true, 
+        errorMessage: error.message,
+        data: [],
+        simulated: true,
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    // Combinar los datos históricos
+    res.json({
+      airQualityHistory,
+      weatherHistory,
+      period: `${days} días`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error en el endpoint de datos históricos:', error);
+    res.status(500).json({
+      error: true,
+      message: 'Error al obtener datos históricos para el dashboard',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @swagger
  * /api/dashboard:
  *   get:
  *     tags:
@@ -458,69 +484,92 @@ app.put('/api/alerts/thresholds/:parameter', async (req, res) => {
 // Endpoint para obtener todos los datos necesarios para el dashboard
 app.get('/api/dashboard', async (req, res) => {
   try {
-    // Obtenemos datos de calidad del aire
-    const airQuality = await airQualityService.getAirQualityData();
-    
-    // Obtenemos datos meteorológicos
-    const weather = await weatherService.getWeatherData();
-    
-    // Obtenemos alertas activas
-    const alerts = await alertService.getActiveAlerts();
-    
-    // Obtenemos recomendaciones basadas en los datos actuales
-    const recommendations = generateRecommendations(airQuality, weather, alerts);
-    
-    // Enviamos todos los datos combinados
+    // Obtener datos de calidad del aire actuales
+    let airQualityData;
+    try {
+      airQualityData = await airQualityService.getCurrentAirQuality();
+    } catch (airQualityError) {
+      console.error('Error al obtener datos de calidad del aire:', airQualityError);
+      airQualityData = { 
+        error: true, 
+        errorMessage: airQualityError.message,
+        data: {
+          city: process.env.DEFAULT_CITY || 'No disponible',
+          aqi: null,
+          category: 'No disponible',
+          source: 'Error',
+          timestamp: new Date()
+        },
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Obtener datos meteorológicos actuales
+    let weatherData;
+    try {
+      weatherData = await weatherService.getCurrentWeather();
+    } catch (weatherError) {
+      console.error('Error al obtener datos meteorológicos:', weatherError);
+      weatherData = { 
+        error: true, 
+        errorMessage: weatherError.message,
+        data: {
+          city: process.env.DEFAULT_CITY || 'No disponible',
+          temperature: null,
+          humidity: null,
+          source: 'Error',
+          timestamp: new Date()
+        },
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Verificar alertas basadas en los datos obtenidos
+    let alerts = [];
+    try {
+      if (airQualityData.data && weatherData.data) {
+        const airQualityAlert = airQualityService.evaluateAirQualityAlert(airQualityData.data);
+        const weatherAlert = weatherService.evaluateWeatherAlert(weatherData.data);
+        
+        if (airQualityAlert.alertLevel !== 'none') {
+          alerts.push({
+            type: 'air-quality',
+            level: airQualityAlert.alertLevel,
+            message: airQualityAlert.message,
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        if (weatherAlert.alertLevel !== 'none') {
+          alerts.push({
+            type: 'weather',
+            level: weatherAlert.alertLevel,
+            message: weatherAlert.message,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+    } catch (alertError) {
+      console.error('Error al evaluar alertas:', alertError);
+      alerts = [];
+    }
+
+    // Combinar todos los datos para el dashboard
     res.json({
-      airQuality,
-      weather,
-      alerts,
-      recommendations,
+      airQuality: airQualityData,
+      weather: weatherData,
+      alerts: alerts,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error al obtener datos para el dashboard:', error);
+    console.error('Error en el endpoint de dashboard:', error);
     res.status(500).json({
-      message: 'Error al obtener datos para el dashboard',
-      error: error.message
+      error: true,
+      message: 'Error al obtener datos del dashboard',
+      errorDetail: error.message
     });
   }
 });
-
-// Función para generar recomendaciones basadas en condiciones ambientales
-function generateRecommendations(airQuality, weather, alerts) {
-  const recommendations = [];
-  
-  // Recomendaciones basadas en calidad del aire
-  if (airQuality.aqi > 150) {
-    recommendations.push("Evite actividades al aire libre debido a la mala calidad del aire.");
-  } else if (airQuality.aqi > 100) {
-    recommendations.push("Personas sensibles deben limitar la exposición prolongada al aire libre.");
-  }
-  
-  // Recomendaciones basadas en precipitaciones
-  if (weather.precipitation > 15) {
-    recommendations.push("Alerta de lluvia intensa. Evite zonas propensas a inundaciones.");
-  } else if (weather.precipitation > 5) {
-    recommendations.push("Lluvia moderada. Lleve paraguas y sea precavido al conducir.");
-  } else if (weather.precipitation > 0) {
-    recommendations.push("Lluvia ligera. Considere llevar paraguas.");
-  }
-  
-  // Recomendaciones basadas en temperatura
-  if (weather.temperature < 10) {
-    recommendations.push("Temperatura baja. Abríguese bien.");
-  } else if (weather.temperature > 28) {
-    recommendations.push("Temperatura alta. Manténgase hidratado y evite exposición prolongada al sol.");
-  }
-  
-  // Si no hay recomendaciones específicas
-  if (recommendations.length === 0) {
-    recommendations.push("Condiciones ambientales favorables. Disfrute del día.");
-  }
-  
-  return recommendations;
-}
 
 // === INICIAR SERVIDOR Y TAREAS PROGRAMADAS ===
 

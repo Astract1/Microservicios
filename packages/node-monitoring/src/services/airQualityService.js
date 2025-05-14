@@ -12,6 +12,16 @@ const DEFAULT_COUNTRY = process.env.DEFAULT_COUNTRY || 'Colombia';
 const DEFAULT_LAT = parseFloat(process.env.DEFAULT_LAT || '4.6097');
 const DEFAULT_LON = parseFloat(process.env.DEFAULT_LON || '-74.0817');
 
+// Estado de la API para diagnósticos
+let apiStatus = {
+  status: 'unknown',
+  lastSuccess: null,
+  lastError: null,
+  errorCount: 0,
+  message: 'Sin inicializar',
+  lastUpdate: new Date().toISOString()
+};
+
 // Función auxiliar para generar números aleatorios en un rango para datos de simulación
 function getRandomForSimulation(min, max) {
   // Seguro para datos de simulación, no se usa para fines de seguridad
@@ -210,13 +220,18 @@ async function getAirQualityByNeighborhoods() {
       throw new Error('API key no configurada. Configure IQAIR_API_KEY en las variables de entorno.');
     }
     
-    // Coordenadas cercanas para simular diferentes barrios
+    // Coordenadas más precisas para diferentes barrios de Bogotá
     const neighborhoods = [
-      { name: 'Centro', lat: DEFAULT_LAT, lon: DEFAULT_LON },
-      { name: 'Norte', lat: DEFAULT_LAT + 0.05, lon: DEFAULT_LON },
-      { name: 'Sur', lat: DEFAULT_LAT - 0.05, lon: DEFAULT_LON },
-      { name: 'Este', lat: DEFAULT_LAT, lon: DEFAULT_LON + 0.05 },
-      { name: 'Oeste', lat: DEFAULT_LAT, lon: DEFAULT_LON - 0.05 }
+      { name: 'Centro', lat: 4.5981, lon: -74.0761, description: 'Zona histórica y administrativa' },
+      { name: 'Chapinero', lat: 4.6486, lon: -74.0664, description: 'Zona comercial y residencial' },
+      { name: 'Usaquén', lat: 4.7062, lon: -74.0308, description: 'Zona residencial de alto nivel' },
+      { name: 'Kennedy', lat: 4.6297, lon: -74.1608, description: 'Zona residencial y comercial densamente poblada' },
+      { name: 'Suba', lat: 4.7449, lon: -74.0865, description: 'Zona mixta con áreas residenciales y humedales' },
+      { name: 'Fontibón', lat: 4.6739, lon: -74.1469, description: 'Zona industrial cercana al aeropuerto' },
+      { name: 'Puente Aranda', lat: 4.6269, lon: -74.1002, description: 'Zona industrial' },
+      { name: 'La Candelaria', lat: 4.5969, lon: -74.0736, description: 'Centro histórico' },
+      { name: 'Bosa', lat: 4.6280, lon: -74.2029, description: 'Zona residencial al sur' },
+      { name: 'Ciudad Bolívar', lat: 4.5100, lon: -74.1600, description: 'Zona periférica montañosa' }
     ];
     
     const results = [];
@@ -238,21 +253,19 @@ async function getAirQualityByNeighborhoods() {
           
           results.push({
             name: neighborhood.name,
+            lat: neighborhood.lat,
+            lon: neighborhood.lon,
+            description: neighborhood.description,
             aqi: response.data.data.current.pollution.aqius,
             temperature: response.data.data.current.weather.tp,
-            humidity: response.data.data.current.weather.hu
+            humidity: response.data.data.current.weather.hu,
+            source: 'IQAir'
           });
         } catch (err) {
           // Si recibimos un error 429, completamos con datos simulados
           if (err.response?.status === 429) {
             console.log(`Error 429 (Too Many Requests) al obtener datos para ${neighborhoods[i].name}, usando simulados`);
-            results.push({
-              name: neighborhoods[i].name,
-              aqi: Math.floor(getRandomForSimulation(40, 70)),
-              temperature: Math.floor(getRandomForSimulation(18, 23)),
-              humidity: Math.floor(getRandomForSimulation(60, 80)),
-              simulated: true
-            });
+            results.push(generateSimulatedNeighborhoodData(neighborhoods[i]));
           } else {
             throw err; // Re-lanzar otros errores
           }
@@ -262,13 +275,7 @@ async function getAirQualityByNeighborhoods() {
     
     // Completar con datos simulados para el resto
     for (let i = samplesToTake; i < neighborhoods.length; i++) {
-      results.push({
-        name: neighborhoods[i].name,
-        aqi: Math.floor(getRandomForSimulation(40, 70)),
-        temperature: Math.floor(getRandomForSimulation(18, 23)),
-        humidity: Math.floor(getRandomForSimulation(60, 80)),
-        simulated: true
-      });
+      results.push(generateSimulatedNeighborhoodData(neighborhoods[i]));
     }
     
     return {
@@ -282,26 +289,92 @@ async function getAirQualityByNeighborhoods() {
     
     // Si hay error 429 o cualquier otro problema, devolver todo simulado
     const neighborhoods = [
-      { name: 'Centro', lat: DEFAULT_LAT, lon: DEFAULT_LON },
-      { name: 'Norte', lat: DEFAULT_LAT + 0.05, lon: DEFAULT_LON },
-      { name: 'Sur', lat: DEFAULT_LAT - 0.05, lon: DEFAULT_LON },
-      { name: 'Este', lat: DEFAULT_LAT, lon: DEFAULT_LON + 0.05 },
-      { name: 'Oeste', lat: DEFAULT_LAT, lon: DEFAULT_LON - 0.05 }
+      { name: 'Centro', lat: 4.5981, lon: -74.0761, description: 'Zona histórica y administrativa' },
+      { name: 'Chapinero', lat: 4.6486, lon: -74.0664, description: 'Zona comercial y residencial' },
+      { name: 'Usaquén', lat: 4.7062, lon: -74.0308, description: 'Zona residencial de alto nivel' },
+      { name: 'Kennedy', lat: 4.6297, lon: -74.1608, description: 'Zona residencial y comercial densamente poblada' },
+      { name: 'Suba', lat: 4.7449, lon: -74.0865, description: 'Zona mixta con áreas residenciales y humedales' },
+      { name: 'Fontibón', lat: 4.6739, lon: -74.1469, description: 'Zona industrial cercana al aeropuerto' },
+      { name: 'Puente Aranda', lat: 4.6269, lon: -74.1002, description: 'Zona industrial' },
+      { name: 'La Candelaria', lat: 4.5969, lon: -74.0736, description: 'Centro histórico' },
+      { name: 'Bosa', lat: 4.6280, lon: -74.2029, description: 'Zona residencial al sur' },
+      { name: 'Ciudad Bolívar', lat: 4.5100, lon: -74.1600, description: 'Zona periférica montañosa' }
     ];
     
     return {
-      data: neighborhoods.map(n => ({
-        name: n.name,
-        aqi: Math.floor(getRandomForSimulation(40, 70)),
-        temperature: Math.floor(getRandomForSimulation(18, 23)),
-        humidity: Math.floor(getRandomForSimulation(60, 80)),
-        simulated: true
-      })),
+      data: neighborhoods.map(n => generateSimulatedNeighborhoodData(n)),
       fullySimulated: true,
       error: error.response?.status === 429 ? 'Límite de API excedido' : error.message,
       timestamp: new Date().toISOString()
     };
   }
+}
+
+// Función auxiliar para generar datos simulados más realistas por barrio
+function generateSimulatedNeighborhoodData(neighborhood) {
+  // Añadir variabilidad basada en características del barrio
+  let aqiBase = 0;
+  let tempBase = 0;
+  
+  // Ajustar AQI según el tipo de barrio
+  if (neighborhood.name === 'Puente Aranda' || neighborhood.name === 'Fontibón') {
+    // Zonas industriales tienen peor calidad del aire
+    aqiBase = 70 + Math.floor(getRandomForSimulation(0, 40));
+  } else if (neighborhood.name === 'Kennedy' || neighborhood.name === 'Bosa') {
+    // Zonas densamente pobladas tienen calidad del aire moderada
+    aqiBase = 50 + Math.floor(getRandomForSimulation(0, 30));
+  } else if (neighborhood.name === 'Ciudad Bolívar') {
+    // Zonas periféricas tienen calidad variable
+    aqiBase = 45 + Math.floor(getRandomForSimulation(0, 45));
+  } else if (neighborhood.name === 'Usaquén' || neighborhood.name === 'Suba') {
+    // Zonas con más áreas verdes tienen mejor calidad
+    aqiBase = 30 + Math.floor(getRandomForSimulation(0, 30));
+  } else {
+    // Otras zonas
+    aqiBase = 40 + Math.floor(getRandomForSimulation(0, 35));
+  }
+  
+  // Ajustar temperatura según altitud y urbanización
+  if (neighborhood.name === 'Ciudad Bolívar') {
+    // Zonas más altas son más frías
+    tempBase = 16 + Math.floor(getRandomForSimulation(0, 4));
+  } else if (neighborhood.name === 'Centro' || neighborhood.name === 'Kennedy') {
+    // Zonas urbanas densas son más calientes (isla de calor)
+    tempBase = 20 + Math.floor(getRandomForSimulation(0, 5));
+  } else {
+    // Otras zonas
+    tempBase = 18 + Math.floor(getRandomForSimulation(0, 4));
+  }
+  
+  // Generar humedad según ubicación
+  let humidityBase = 0;
+  if (neighborhood.name === 'Suba' || neighborhood.name === 'Fontibón') {
+    // Zonas cercanas a humedales o ríos
+    humidityBase = 70 + Math.floor(getRandomForSimulation(0, 15));
+  } else if (neighborhood.name === 'Ciudad Bolívar') {
+    // Zonas más altas y secas
+    humidityBase = 55 + Math.floor(getRandomForSimulation(0, 10));
+  } else {
+    // Otras zonas
+    humidityBase = 60 + Math.floor(getRandomForSimulation(0, 15));
+  }
+  
+  // Obtener categoría de AQI para el valor generado
+  const aqiInfo = getAQICategory(aqiBase);
+  
+  return {
+    name: neighborhood.name,
+    lat: neighborhood.lat,
+    lon: neighborhood.lon,
+    description: neighborhood.description,
+    aqi: aqiBase,
+    category: aqiInfo.category,
+    color: aqiInfo.color,
+    temperature: tempBase,
+    humidity: humidityBase,
+    source: 'Simulado',
+    simulated: true
+  };
 }
 
 async function getHistoricalData(days = 7) {
@@ -419,11 +492,205 @@ function evaluateAirQualityAlert(aqi) {
   return { alertLevel: 'none', message: '' };
 }
 
+// Función auxiliar para generar un AQI aleatorio para datos de simulación
+function getRandomAQI() {
+  // Simulación: más probabilidad de valor moderado (51-100)
+  const ranges = [
+    { min: 0, max: 50, weight: 0.3 },    // Bueno
+    { min: 51, max: 100, weight: 0.4 },  // Moderado
+    { min: 101, max: 150, weight: 0.2 }, // Poco saludable para grupos sensibles
+    { min: 151, max: 200, weight: 0.05 },// Poco saludable
+    { min: 201, max: 300, weight: 0.03 },// Muy poco saludable
+    { min: 301, max: 500, weight: 0.02 } // Peligroso
+  ];
+  
+  const totalWeight = ranges.reduce((sum, range) => sum + range.weight, 0);
+  let randomValue = Math.random() * totalWeight;
+  
+  for (const range of ranges) {
+    if (randomValue <= range.weight) {
+      return Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+    }
+    randomValue -= range.weight;
+  }
+  
+  return Math.floor(Math.random() * 100) + 50; // fallback
+}
+
+// Función auxiliar para determinar la categoría de AQI
+function getAQICategory(aqi) {
+  if (aqi <= 50) return { category: 'Buena', color: '#00e400', description: 'La calidad del aire es satisfactoria y la contaminación del aire presenta poco o ningún riesgo.' };
+  else if (aqi <= 100) return { category: 'Moderada', color: '#ffff00', description: 'La calidad del aire es aceptable, sin embargo, puede haber preocupación para algunas personas.' };
+  else if (aqi <= 150) return { category: 'Poco Saludable para Grupos Sensibles', color: '#ff7e00', description: 'Los miembros de grupos sensibles pueden experimentar efectos en la salud.' };
+  else if (aqi <= 200) return { category: 'Poco Saludable', color: '#ff0000', description: 'Toda la población puede comenzar a experimentar efectos en la salud.' };
+  else if (aqi <= 300) return { category: 'Muy Poco Saludable', color: '#99004c', description: 'Advertencias sanitarias de condiciones de emergencia.' };
+  else return { category: 'Peligrosa', color: '#7e0023', description: 'Alerta de salud: todos pueden experimentar efectos de salud más graves.' };
+}
+
+// Obtener datos de calidad del aire actuales usando IQAir
+async function getCurrentAirQuality() {
+  try {
+    // Verificar si tenemos API key de IQAir
+    if (!API_KEY) {
+      throw new Error('API key no configurada. Configure IQAIR_API_KEY en las variables de entorno.');
+    }
+
+    console.log('Obteniendo datos de calidad del aire actuales...');
+    console.log(`URL: ${BASE_URL}/city, API Key: ${API_KEY ? API_KEY.substring(0, 4) + '...' : 'no definida'}`);
+    console.log(`Ciudad: ${DEFAULT_CITY}, Estado: ${DEFAULT_STATE}, País: ${DEFAULT_COUNTRY}`);
+    
+    // Implementar un timeout para evitar bloqueos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    // Realizar la petición a la API
+    const response = await axios.get(`${BASE_URL}/city`, {
+      params: {
+        city: DEFAULT_CITY,
+        state: DEFAULT_STATE,
+        country: DEFAULT_COUNTRY,
+        key: API_KEY
+      },
+      signal: controller.signal,
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    // Actualizar estado de la API
+    apiStatus = {
+      status: 'success',
+      lastSuccess: new Date().toISOString(),
+      lastError: apiStatus.lastError,
+      errorCount: 0,
+      message: 'API funcionando correctamente',
+      lastUpdate: new Date().toISOString()
+    };
+    
+    const data = response.data;
+    
+    if (data.status !== 'success' || !data.data) {
+      throw new Error(`Error en la respuesta de IQAir: ${data.status}`);
+    }
+    
+    // Extraer y procesar los datos
+    const airQuality = data.data.current.pollution;
+    const weather = data.data.current.weather;
+    const location = data.data.location;
+    
+    // Obtener categoría de AQI
+    const aqiInfo = getAQICategory(airQuality.aqius);
+    
+    // Crear objeto con los datos procesados
+    const processedData = {
+      city: DEFAULT_CITY,
+      aqi: airQuality.aqius,
+      pm25: airQuality.mainus === 'p2' ? airQuality.aqius : null, // IQAir usa AQI US para PM2.5
+      category: aqiInfo.category,
+      color: aqiInfo.color,
+      description: aqiInfo.description,
+      temperature: weather.tp,
+      humidity: weather.hu,
+      coordinates: {
+        lat: location.coordinates[1],
+        lon: location.coordinates[0]
+      },
+      source: 'IQAir',
+      timestamp: new Date()
+    };
+    
+    // Guardar en la base de datos
+    try {
+      await saveAirQualityData(processedData);
+      console.log('Datos de calidad del aire guardados en la base de datos correctamente');
+    } catch (error) {
+      console.warn('No se pudieron guardar los datos de calidad del aire en la BD:', error.message);
+    }
+    
+    return {
+      data: processedData,
+      rawData: data.data,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    // Actualizar estado de la API en caso de error
+    apiStatus = {
+      status: 'error',
+      lastSuccess: apiStatus.lastSuccess,
+      lastError: new Date().toISOString(),
+      errorCount: apiStatus.errorCount + 1,
+      message: error.message,
+      lastUpdate: new Date().toISOString()
+    };
+    
+    if (error.response) {
+      console.error('Error en la respuesta de IQAir:', {
+        status: error.response.status,
+        data: error.response.data
+      });
+    } else if (error.request) {
+      console.error('No se recibió respuesta de IQAir:', error.message);
+    } else {
+      console.error('Error al configurar la petición a IQAir:', error.message);
+    }
+    
+    console.log('Generando datos de calidad del aire simulados debido al error...');
+    
+    // Generar datos simulados en caso de error
+    const aqi = getRandomAQI();
+    const aqiInfo = getAQICategory(aqi);
+    
+    const simulatedData = {
+      city: DEFAULT_CITY,
+      aqi: aqi,
+      pm25: Math.round(aqi * 0.8),
+      pm10: Math.round(aqi * 0.6),
+      category: aqiInfo.category,
+      color: aqiInfo.color,
+      description: aqiInfo.description,
+      temperature: Math.round(Math.random() * 10 + 20), // 20-30°C
+      humidity: Math.round(Math.random() * 30 + 50),    // 50-80%
+      coordinates: {
+        lat: 4.6097,  // Bogotá por defecto
+        lon: -74.0817
+      },
+      source: 'Simulado',
+      timestamp: new Date()
+    };
+    
+    // Intentar guardar datos simulados
+    try {
+      await saveAirQualityData(simulatedData);
+      console.log('Datos simulados de calidad del aire guardados en la base de datos');
+    } catch (dbError) {
+      console.warn('No se pudieron guardar los datos simulados en la BD:', dbError.message);
+    }
+    
+    return {
+      data: simulatedData,
+      error: error.message,
+      errorDetail: error.response?.data || error.request || error.message,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+// Función para obtener el estado actual de la API
+function getApiStatus() {
+  return apiStatus;
+}
+
 module.exports = {
   getAirQualityData,
   getAirQualityStations,
   getSupportedCountries,
   getAirQualityByNeighborhoods,
   getHistoricalData,
-  evaluateAirQualityAlert
+  evaluateAirQualityAlert,
+  getCurrentAirQuality,
+  getAQICategory,
+  getApiStatus
 };

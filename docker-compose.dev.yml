@@ -1,0 +1,236 @@
+version: '3.8'
+
+# Red compartida para todos los servicios
+networks:
+  microservicios-net:
+    driver: bridge
+
+# Volúmenes persistentes
+volumes:
+  mariadb_data:
+    driver: local
+  risk_data:
+    driver: local
+  prevention_data:
+    driver: local
+
+services:
+  #=======================================================
+  # SERVICIO DE BASE DE DATOS
+  #=======================================================
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+      MYSQL_DATABASE: monitoreo_ambiental
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-db_password}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./packages/node-monitoring/database-schema.sql:/docker-entrypoint-initdb.d/01-init-monitoring.sql
+      - ./packages/node-education/database-schema.sql:/docker-entrypoint-initdb.d/02-init-education.sql
+    ports:
+      - "3306:3306"
+    command: --bind-address=0.0.0.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - microservicios-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  #=======================================================
+  # SERVICIOS BACKEND CON HOT RELOAD
+  #=======================================================
+  
+  # Servicio de monitoreo ambiental con hot reload
+  node-monitoring-dev:
+    image: node:20-alpine
+    container_name: node-monitoring-dev
+    working_dir: /app
+    command: >
+      sh -c "npm install -g nodemon && 
+             npm install && 
+             npm run hot"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DB_HOST=mariadb
+      - DB_USER=root
+      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
+      - DB_DATABASE=monitoreo_ambiental
+      - WEATHER_API_KEY=083f73951c36eb001791219b1dae0565
+      - WEATHER_API_URL=https://api.openweathermap.org/data/2.5
+      - IQAIR_API_KEY=19f1c671-c320-4e74-b039-7cc087d4547e
+      - IQAIR_BASE_URL=http://api.airvisual.com/v2
+      - DEFAULT_CITY=Bogota
+      - DEFAULT_STATE=Bogota D.C.
+      - DEFAULT_COUNTRY=Colombia
+      - DEFAULT_LAT=4.6097
+      - DEFAULT_LON=-74.0817
+    ports:
+      - "3001:3001"
+      - "9229:9229" # Para Node Inspector
+    volumes:
+      - ./packages/node-monitoring:/app
+    networks:
+      - microservicios-net
+    depends_on:
+      - mariadb
+    tty: true
+
+  # Servicio de educación ambiental con hot reload
+  node-education-dev:
+    image: node:20-alpine
+    container_name: node-education-dev
+    working_dir: /app
+    command: >
+      sh -c "npm install -g nodemon && 
+             npm install && 
+             npm run hot"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DB_HOST=mariadb
+      - DB_USER=root
+      - DB_PASSWORD=${DB_ROOT_PASSWORD:-admin}
+      - DB_DATABASE=monitoreo_ambiental
+      - MONITORING_API_URL=http://node-monitoring-dev:3001/api
+    ports:
+      - "3002:3002"
+      - "9230:9229" # Para Node Inspector (puerto diferente)
+    volumes:
+      - ./packages/node-education:/app
+    networks:
+      - microservicios-net
+    depends_on:
+      - mariadb
+      - node-monitoring-dev
+    tty: true
+    
+  # Servicio de evaluación de riesgos con hot reload
+  dotnet-risk-dev:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: dotnet-risk-dev
+    working_dir: /app
+    command: dotnet watch run --project RiskService/RiskService.csproj --urls=http://+:80 --environment=Development
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DATABASE_CONNECTION=Data Source=/app/Data/RiskService.db
+      - WEATHER_API_KEY=083f73951c36eb001791219b1dae0565
+      - ASPNETCORE_URLS=http://+:80
+      - MONITORING_API_URL=http://node-monitoring-dev:3001/api
+    volumes:
+      - ./packages/dotnet-risk:/app
+      - risk_data:/app/Data
+    ports:
+      - "5002:80"
+      - "5012:443"
+    networks:
+      - microservicios-net
+    depends_on:
+      - node-monitoring-dev
+    tty: true
+
+  # Servicio de prevención con hot reload
+  dotnet-prevention-dev:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: dotnet-prevention-dev
+    working_dir: /app/PreventionService
+    command: dotnet watch --project . --no-hot-reload
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DATABASE_CONNECTION=Data Source=/app/Data/PreventionService.db
+      - DOTNET_RISK_API_URL=http://dotnet-risk-dev
+      - WEATHER_API_KEY=083f73951c36eb001791219b1dae0565
+      - ASPNETCORE_URLS=http://+:80
+      - MONITORING_API_URL=http://node-monitoring-dev:3001/api
+    volumes:
+      - ./packages/dotnet-prevention:/app
+      - prevention_data:/app/Data
+    ports:
+      - "5001:80"
+      - "5011:443"
+    networks:
+      - microservicios-net
+    depends_on:
+      - dotnet-risk-dev
+    tty: true
+
+  #=======================================================
+  # INTERFAZ DE USUARIO CON HOT RELOAD
+  #=======================================================
+  
+  # Frontend unificado con hot reload
+  frontend-dev:
+    image: node:20
+    container_name: frontend-dev
+    working_dir: /app
+    command: >
+      sh -c "npm install &&
+             npm run start:hot"
+    environment:
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true
+      - FAST_REFRESH=true
+      - REACT_APP_API_URL=/api
+      - REACT_APP_WEATHER_API_URL=/api/weather
+      - REACT_APP_EDUCATION_API_URL=/education-api
+      - REACT_APP_RISK_API_URL=/risk-api
+      - REACT_APP_PREVENTION_API_URL=/prevention-api
+      - REACT_APP_MAP_PROVIDER=openstreetmap
+      - WDS_SOCKET_PORT=3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/frontend:/app
+    networks:
+      - microservicios-net
+    depends_on:
+      - node-monitoring-dev
+      - node-education-dev
+      - dotnet-risk-dev
+      - dotnet-prevention-dev
+    tty: true
+
+  #=======================================================
+  # API GATEWAY DE DESARROLLO
+  #=======================================================
+  
+  # API Gateway con Nginx para desarrollo
+  api-gateway-dev:
+    image: nginx:alpine
+    container_name: api-gateway-dev
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/gateway-dev.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - microservicios-net
+    depends_on:
+      - node-monitoring-dev
+      - node-education-dev
+      - dotnet-risk-dev
+      - dotnet-prevention-dev
+      - frontend-dev
+
+  # Herramienta de Administración DB
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-admin}
+    ports:
+      - "8080:80"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mariadb 

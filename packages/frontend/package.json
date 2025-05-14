@@ -46,5 +46,6 @@
     },
     "devDependencies": {
         "cross-env": "^7.0.3"
-    }
+    },
+    "proxy": "http://api-gateway-dev"
 }

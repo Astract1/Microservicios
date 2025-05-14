@@ -11,12 +11,12 @@ namespace RiskService.Models
         public int Age { get; set; }
         
         [Required]
-        public string Location { get; set; }
+        public string Location { get; set; } = string.Empty;
         
         [Required]
-        public string HealthStatus { get; set; }
+        public string HealthStatus { get; set; } = string.Empty;
         
-        public required string[] MedicalConditions { get; set; }
+        public string[] MedicalConditions { get; set; } = Array.Empty<string>();
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

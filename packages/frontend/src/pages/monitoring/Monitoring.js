@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useSpring, animated } from 'react-spring';
+import { useSpring, animated, config as springConfig } from 'react-spring';
 import Plot from 'react-plotly.js';
 import '../../styles/monitoring/Monitoring.css';
 
@@ -12,11 +12,10 @@ import RecommendationsPanel from '../../components/monitoring/RecommendationsPan
 import MapView from '../../components/monitoring/MapView';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatusIndicator from '../../components/monitoring/StatusIndicator';
+import AirQualityHistoryChart from '../../components/monitoring/AirQualityHistoryChart';
 
-// Configuración de la API
-// Detectamos si la URL base ya incluye /api para evitar duplicación
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
-const BASE_URL = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
+// Configuración de la API - Usar directamente la URL base adecuada
+const API_BASE_URL = '/api';
 const DEFAULT_CITY = process.env.REACT_APP_DEFAULT_CITY || 'Bogotá';
 
 const Monitoring = () => {
@@ -26,68 +25,127 @@ const Monitoring = () => {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [apiStatus, setApiStatus] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Animación para los paneles con react-spring
+  // Animaciones mejoradas con react-spring
   const fadeIn = useSpring({
     from: { opacity: 0, transform: 'translateY(20px)' },
     to: { opacity: 1, transform: 'translateY(0)' },
-    config: { duration: 500 }
+    config: springConfig.gentle,
+    delay: 100
+  });
+
+  const headerAnimation = useSpring({
+    from: { opacity: 0, transform: 'translateY(-20px)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+    config: springConfig.gentle
+  });
+
+  const cardAnimation = useSpring({
+    from: { scale: 0.9, opacity: 0 },
+    to: { scale: 1, opacity: 1 },
+    config: springConfig.wobbly
+  });
+
+  const pulseAnimation = useSpring({
+    from: { transform: 'scale(1)' },
+    to: { transform: 'scale(1.05)' },
+    config: { duration: 1000, tension: 300, friction: 10 },
+    loop: { reverse: true }
   });
 
   // Obtener los datos del dashboard
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      // Usamos BASE_URL sin añadir /api nuevamente
-      const response = await axios.get(`${BASE_URL}/dashboard`);
-      console.log('Datos recibidos:', response.data); // Para depuración
+      setRefreshing(true);
+      
+      // Implementamos un timeout para asegurar que la petición no se quede esperando indefinidamente
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await axios.get(`${API_BASE_URL}/dashboard`, {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      console.log('Datos recibidos:', response.data);
+      
       setDashboardData(response.data);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
       console.error('Error al obtener datos del dashboard:', err);
-      // En caso de error, establecer datos vacíos pero con formato consistente
-      setDashboardData({
-        airQuality: {
-          error: true,
-          errorMessage: err.message,
-          data: {
-            city: DEFAULT_CITY || 'No disponible',
-            aqi: undefined,
-            temperature: undefined,
-            humidity: undefined,
-            timestamp: new Date(),
-            source: 'Error',
-            error: err.message
-          }
-        },
-        weather: {
-          error: true,
-          errorMessage: err.message,
-          data: {
-            temperature: undefined,
-            humidity: undefined,
-            conditions: undefined,
-            source: 'Error',
-            error: err.message
-          }
-        },
-        timestamp: new Date().toISOString()
-      });
-      setError('Error al cargar los datos del dashboard. Por favor, intente nuevamente más tarde.');
+      // En caso de error, mantener datos anteriores si existen y mostrar mensaje
+      if (!dashboardData) {
+        setDashboardData({
+          airQuality: {
+            error: true,
+            errorMessage: err.message,
+            data: {
+              city: DEFAULT_CITY || 'No disponible',
+              aqi: undefined,
+              temperature: undefined,
+              humidity: undefined,
+              timestamp: new Date(),
+              source: 'Error',
+              error: err.message
+            }
+          },
+          weather: {
+            error: true,
+            errorMessage: err.message,
+            data: {
+              temperature: undefined,
+              humidity: undefined,
+              conditions: undefined,
+              source: 'Error',
+              error: err.message
+            }
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
+      setError('Error al cargar los datos del dashboard. Reintentando automáticamente...');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  // Verificar el estado de las APIs
+  // Verificar el estado de las APIs con mejor manejo de errores
   const checkApiStatus = async () => {
     try {
-      // Usamos BASE_URL sin añadir /api nuevamente
-      const response = await axios.get(`${BASE_URL}/diagnostics`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      
+      const response = await axios.get(`${API_BASE_URL}/diagnostics`, {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      clearTimeout(timeoutId);
       setApiStatus(response.data);
     } catch (err) {
       console.error('Error al verificar estado de APIs:', err);
+      // Mantener el estado anterior si ya existe, o marcar todo como error
+      if (!apiStatus || Object.keys(apiStatus).length === 0) {
+        setApiStatus({
+          apis: {
+            iqair: { status: 'error', message: err.message, lastUpdate: new Date().toISOString() },
+            openweathermap: { status: 'error', message: err.message, lastUpdate: new Date().toISOString() }
+          },
+          db: { status: 'unknown', message: err.message, lastUpdate: new Date().toISOString() }
+        });
+      }
     }
   };
 
@@ -97,46 +155,60 @@ const Monitoring = () => {
     fetchDashboardData();
     checkApiStatus();
     
-    // Configurar intervalo para actualizar cada 5 minutos
-    const intervalId = setInterval(() => {
+    // Configurar intervalo para actualizar cada 3 minutos
+    const dataIntervalId = setInterval(() => {
       fetchDashboardData();
+    }, 3 * 60 * 1000);
+    
+    // Verificar estado de APIs cada 5 minutos
+    const statusIntervalId = setInterval(() => {
       checkApiStatus();
     }, 5 * 60 * 1000);
     
-    // Limpiar intervalo al desmontar
-    return () => clearInterval(intervalId);
+    // Limpiar intervalos al desmontar
+    return () => {
+      clearInterval(dataIntervalId);
+      clearInterval(statusIntervalId);
+    };
   }, []);
 
-  // Si está cargando, mostrar spinner
+  // Si está cargando por primera vez, mostrar spinner
   if (loading && !dashboardData) {
     return (
       <div className="loading-container">
-        <LoadingSpinner />
+        <animated.div style={pulseAnimation}>
+          <LoadingSpinner />
+        </animated.div>
         <p>Cargando datos de monitoreo ambiental...</p>
       </div>
     );
   }
 
-  // Si hay error, mostrar mensaje
+  // Si hay error sin datos, mostrar mensaje
   if (error && !dashboardData) {
     return (
       <div className="error-container">
         <h2>Error de conexión</h2>
         <p>{error}</p>
-        <button onClick={fetchDashboardData} className="retry-button">
+        <animated.button 
+          style={pulseAnimation}
+          onClick={fetchDashboardData} 
+          className="retry-button"
+        >
           Intentar nuevamente
-        </button>
+        </animated.button>
       </div>
     );
   }
 
   return (
     <animated.div style={fadeIn} className="monitoring-container">
-      <header className="monitoring-header">
+      <animated.header style={headerAnimation} className="monitoring-header">
         <div className="title-section">
           <h1>Monitoreo Ambiental en Tiempo Real</h1>
           <p className="last-updated">
             Última actualización: {lastUpdated ? new Date(lastUpdated).toLocaleString('es-ES') : 'Cargando...'}
+            {refreshing && <span className="refreshing-indicator"> (Actualizando...)</span>}
           </p>
         </div>
         <div className="status-indicators">
@@ -180,123 +252,47 @@ const Monitoring = () => {
               apiStatus.db.lastUpdate : null}
           />
         </div>
-      </header>
+      </animated.header>
 
       <div className="dashboard-grid">
         {/* Primera fila: Resumen de calidad del aire y clima */}
         <section className="summary-section">
           {dashboardData && (
             <>
-              <AirQualityCard airQuality={dashboardData.airQuality} />
-              <WeatherCard weather={dashboardData.weather} />
+              <animated.div style={cardAnimation}>
+                <AirQualityCard airQuality={dashboardData.airQuality} />
+              </animated.div>
+              <animated.div style={{...cardAnimation, delay: 200}}>
+                <WeatherCard weather={dashboardData.weather} />
+              </animated.div>
             </>
           )}
         </section>
 
         {/* Segunda fila: Mapa interactivo */}
-        <section className="map-section">
+        <animated.section style={{...fadeIn, delay: 300}} className="map-section">
           <h2>Mapa de Calidad del Aire</h2>
           {dashboardData && <MapView 
             airQualityData={dashboardData.airQuality} 
-            center={dashboardData.airQuality && dashboardData.airQuality.data && dashboardData.airQuality.data.coordinates ? 
-              [dashboardData.airQuality.data.coordinates.lat, dashboardData.airQuality.data.coordinates.lon] : 
-              null
-            }
+            weatherData={dashboardData.weather}
           />}
-        </section>
+        </animated.section>
 
-        {/* Tercera fila: Gráficos de tendencia */}
-        <section className="trends-section">
-          <h2>Tendencias Recientes</h2>
-          <div className="charts-container">
-            {dashboardData && dashboardData.airQuality && dashboardData.airQuality.data && (
-              <div className="chart-wrapper">
-                <h3>Índice de Calidad del Aire (últimas 24h)</h3>
-                <Plot
-                  data={[
-                    {
-                      x: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()],
-                      y: dashboardData.airQuality.data.aqi !== undefined ? 
-                        [dashboardData.airQuality.data.aqi - Math.random() * 10, dashboardData.airQuality.data.aqi] : 
-                        [50, 50], // Valores por defecto si no hay datos reales
-                      type: 'scatter',
-                      mode: 'lines+markers',
-                      marker: { color: getAQIColor(dashboardData.airQuality.data.aqi) },
-                      line: { shape: 'spline', smoothing: 1.3 }
-                    }
-                  ]}
-                  layout={{
-                    autosize: true,
-                    height: 250,
-                    margin: { l: 40, r: 20, t: 20, b: 40 },
-                    xaxis: { title: 'Hora' },
-                    yaxis: { title: 'AQI' }
-                  }}
-                  config={{ responsive: true }}
-                  className="plotly-chart"
-                />
-              </div>
-            )}
-            
-            {dashboardData && dashboardData.weather && dashboardData.weather.data && (
-              <div className="chart-wrapper">
-                <h3>Temperatura y Humedad (últimas 24h)</h3>
-                <Plot
-                  data={[
-                    {
-                      x: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()],
-                      y: dashboardData.weather.data.temperature !== undefined ? 
-                        [dashboardData.weather.data.temperature - 2, dashboardData.weather.data.temperature] : 
-                        [20, 22], // Valores por defecto si no hay datos reales
-                      type: 'scatter',
-                      mode: 'lines+markers',
-                      name: 'Temperatura (°C)',
-                      marker: { color: '#FF5733' },
-                      line: { shape: 'spline', smoothing: 1.3 }
-                    },
-                    {
-                      x: [new Date(Date.now() - 24 * 60 * 60 * 1000), new Date()],
-                      y: dashboardData.weather.data.humidity !== undefined ? 
-                        [dashboardData.weather.data.humidity - 5, dashboardData.weather.data.humidity] : 
-                        [60, 65], // Valores por defecto si no hay datos reales
-                      type: 'scatter',
-                      mode: 'lines+markers',
-                      name: 'Humedad (%)',
-                      marker: { color: '#3498DB' },
-                      line: { shape: 'spline', smoothing: 1.3 }
-                    }
-                  ]}
-                  layout={{
-                    autosize: true,
-                    height: 250,
-                    margin: { l: 40, r: 20, t: 20, b: 40 },
-                    xaxis: { title: 'Hora' },
-                    yaxis: { title: 'Valor' },
-                    legend: { orientation: 'h', y: -0.2 }
-                  }}
-                  config={{ responsive: true }}
-                  className="plotly-chart"
-                />
-              </div>
-            )}
-          </div>
-        </section>
+        {/* Tercera fila: Gráfica histórica de calidad del aire */}
+        <animated.section style={{...fadeIn, delay: 400}} className="chart-section">
+          <AirQualityHistoryChart days={7} />
+        </animated.section>
 
-        {/* Cuarta fila: Alertas y recomendaciones */}
-        <div className="info-row">
-          <section className="alerts-section">
-            <h2>Alertas Activas</h2>
-            {dashboardData && (
-              <AlertsPanel alerts={dashboardData.alerts || []} />
-            )}
-          </section>
-          
-          <section className="recommendations-section">
-            <h2>Recomendaciones</h2>
-            {dashboardData && (
-              <RecommendationsPanel recommendations={dashboardData.recommendations || []} />
-            )}
-          </section>
+        {/* Botón para actualización manual */}
+        <div className="refresh-button-container">
+          <animated.button 
+            className={`refresh-button ${refreshing ? 'refreshing' : ''}`}
+            onClick={refreshing ? null : fetchDashboardData}
+            style={refreshing ? pulseAnimation : {}}
+            disabled={refreshing}
+          >
+            {refreshing ? 'Actualizando...' : 'Actualizar datos'}
+          </animated.button>
         </div>
       </div>
     </animated.div>
