@@ -19,6 +19,9 @@ const ContentBarChart = () => {
   const infographics = [2, 1, 2, 2, 1, 3];
 
   useEffect(() => {
+    // Solo procedemos si chartRef.current existe
+    if (!chartRef.current) return;
+    
     const data = [
       {
         x: categories,
@@ -93,8 +96,12 @@ const ContentBarChart = () => {
 
     Plotly.newPlot(chartRef.current, data, layout, config);
 
-    // Limpieza al desmontar
-    return () => Plotly.purge(chartRef.current);
+    // Limpieza al desmontar con verificación de que chartRef.current todavía existe
+    return () => {
+      if (chartRef.current) {
+        Plotly.purge(chartRef.current);
+      }
+    };
   }, []);
 
   return (
