@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/Prevention.css';
+import Statistics from './Statistics';
 
 const Prevention = () => {
   const [activeTab, setActiveTab] = useState('actions');
@@ -70,6 +71,12 @@ const Prevention = () => {
         >
           Recomendaciones
         </button>
+        <button 
+          className={`tab-button ${activeTab === 'statistics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('statistics')}
+        >
+          Estadísticas
+        </button>
       </div>
 
       <div className="prevention-content">
@@ -107,6 +114,8 @@ const Prevention = () => {
             </div>
           </div>
         )}
+
+        {activeTab === 'statistics' && <Statistics />}
       </div>
     </div>
   );
