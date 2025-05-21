@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './PreventiveActions.css';
+import '../styles/PreventiveActions.css'; 
 
 const PreventiveActions = () => {
   const [filter, setFilter] = useState('all');

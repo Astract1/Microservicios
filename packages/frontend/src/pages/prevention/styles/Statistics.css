@@ -1,0 +1,26 @@
+.statistics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.chart-section {
+  margin-bottom: 40px;
+}
+
+.chart {
+  width: 100%;
+  height: 500px;
+}
+
+.chart-description {
+  text-align: center;
+  font-style: italic;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .chart {
+    height: 400px;
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Prevention.css';
+import '../styles/Prevention.css';
 
 const Prevention = () => {
   const [activeTab, setActiveTab] = useState('actions');

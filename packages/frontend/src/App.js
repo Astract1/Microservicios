@@ -24,8 +24,8 @@ const Education = lazy(() => import('./pages/education/Education'));
 const Courses = lazy(() => import('./pages/education/Courses'));
 
 // Módulo Prevention
-const Prevention = lazy(() => import('./pages/prevention/Prevention'));
-const PreventiveActions = lazy(() => import('./pages/prevention/PreventiveActions'));
+const Prevention = lazy(() => import('./pages/prevention/components/Prevention'));
+const PreventiveActions = lazy(() => import('./pages/prevention/components/PreventiveActions'));
 
 // Página 404
 const NotFound = lazy(() => import('./pages/NotFound'));
