@@ -297,11 +297,10 @@ const ContentList = () => {
   });
 
   // Animación para el botón de ver contenido
-  const buttonSpring = useSpring({
-    from: { scale: 1 },
-    to: { scale: 1 },
+  const [buttonProps, buttonApi] = useSpring(() => ({
+    scale: 1,
     config: { tension: 300, friction: 10 }
-  });
+  }));
 
   // Transición para las tarjetas al filtrar
   const transitions = useTransition(filtering ? [] : paginatedContent, {
@@ -411,11 +410,11 @@ const ContentList = () => {
                   ))}
                 </div>
                 <animated.button
-                  style={buttonSpring}
+                  style={buttonProps}
                   className="view-content-button"
                   onClick={() => setSelectedContent(item)}
-                  onMouseEnter={() => buttonSpring.start({ scale: 1.05 })}
-                  onMouseLeave={() => buttonSpring.start({ scale: 1 })}
+                  onMouseEnter={() => buttonApi.start({ scale: 1.05 })}
+                  onMouseLeave={() => buttonApi.start({ scale: 1 })}
                 >
                   Ver Contenido
                 </animated.button>

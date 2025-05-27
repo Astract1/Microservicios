@@ -1,0 +1,153 @@
+.help-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 500px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.help-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #3498db;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.help-header h2 {
+  margin: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.help-icon {
+  margin-right: 10px;
+  font-size: 24px;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.help-content {
+  padding: 20px;
+}
+
+.help-section {
+  margin-bottom: 20px;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.section-header:hover {
+  background-color: #ebeef0;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.toggle-icon {
+  color: #3498db;
+}
+
+.section-content {
+  padding: 15px;
+  border-top: 1px solid #e1e8ed;
+  background-color: white;
+}
+
+.section-content p {
+  margin-top: 0;
+  line-height: 1.5;
+  color: #333;
+}
+
+.section-content ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.section-content li {
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.aqi-scale {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.aqi-level {
+  display: flex;
+  padding: 8px 12px;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+
+.aqi-range {
+  flex: 0 0 60px;
+  font-weight: bold;
+}
+
+.aqi-desc {
+  flex: 1;
+}
+
+.metrics-glossary dt {
+  font-weight: bold;
+  margin-top: 10px;
+  color: #2c3e50;
+}
+
+.metrics-glossary dd {
+  margin-left: 0;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .help-panel {
+    width: 100%;
+  }
+} 

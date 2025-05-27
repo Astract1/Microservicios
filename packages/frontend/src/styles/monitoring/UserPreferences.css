@@ -1,0 +1,143 @@
+.user-preferences {
+  background-color: #f5f8fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.user-preferences h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  border-bottom: 1px solid #e1e8ed;
+  padding-bottom: 10px;
+}
+
+.preference-section {
+  margin-bottom: 25px;
+}
+
+.preference-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #3498db;
+  font-size: 18px;
+}
+
+.preference-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.preference-item label {
+  flex: 1;
+  font-weight: 500;
+  margin-right: 15px;
+}
+
+.preference-item select {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #dce1e5;
+  background-color: white;
+  font-size: 14px;
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.preference-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.preference-checkbox input[type="checkbox"] {
+  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+}
+
+.preference-checkbox label {
+  font-size: 14px;
+}
+
+.preference-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e8ed;
+}
+
+.save-button, .reset-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.save-button {
+  background-color: #3498db;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #2980b9;
+}
+
+.reset-button {
+  background-color: #f1f1f1;
+  color: #555;
+}
+
+.reset-button:hover {
+  background-color: #e4e4e4;
+}
+
+.keyboard-shortcuts {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #e1e8ed;
+}
+
+.keyboard-shortcuts h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #3498db;
+}
+
+.keyboard-shortcuts ul {
+  list-style-type: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.keyboard-shortcuts li {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.keyboard-shortcuts strong {
+  display: inline-block;
+  min-width: 25px;
+  padding: 2px 6px;
+  margin-right: 8px;
+  background-color: #f1f1f1;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-family: monospace;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+} 

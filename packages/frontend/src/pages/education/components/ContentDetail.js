@@ -20,18 +20,16 @@ const ContentDetail = ({ content, onClose }) => {
   });
 
   // Animación para el botón de cerrar
-  const closeButtonSpring = useSpring({
-    from: { scale: 1 },
-    to: { scale: 1 },
+  const [closeButtonProps, closeButtonApi] = useSpring(() => ({
+    scale: 1,
     config: { tension: 300, friction: 10 }
-  });
+  }));
 
   // Animación para el botón de alternar vista
-  const toggleButtonSpring = useSpring({
-    from: { scale: 1 },
-    to: { scale: 1 },
+  const [toggleButtonProps, toggleButtonApi] = useSpring(() => ({
+    scale: 1,
     config: { tension: 300, friction: 10 }
-  });
+  }));
 
   const renderContent = () => {
     switch (content.content_type) {
@@ -281,22 +279,22 @@ const ContentDetail = ({ content, onClose }) => {
         onClick={e => e.stopPropagation()}
       >
         <animated.button
-          style={closeButtonSpring}
+          style={closeButtonProps}
           className="close-button"
           onClick={onClose}
-          onMouseEnter={() => closeButtonSpring.start({ scale: 1.1 })}
-          onMouseLeave={() => closeButtonSpring.start({ scale: 1 })}
+          onMouseEnter={() => closeButtonApi.start({ scale: 1.1 })}
+          onMouseLeave={() => closeButtonApi.start({ scale: 1 })}
         >
           ×
         </animated.button>
         {renderContent()}
         <div className="content-actions">
           <animated.button
-            style={toggleButtonSpring}
+            style={toggleButtonProps}
             className="toggle-preview-button"
             onClick={() => setIsPreview(!isPreview)}
-            onMouseEnter={() => toggleButtonSpring.start({ scale: 1.05 })}
-            onMouseLeave={() => toggleButtonSpring.start({ scale: 1 })}
+            onMouseEnter={() => toggleButtonApi.start({ scale: 1.05 })}
+            onMouseLeave={() => toggleButtonApi.start({ scale: 1 })}
           >
             {isPreview ? 'Ver Contenido Completo' : 'Ver Vista Previa'}
           </animated.button>
